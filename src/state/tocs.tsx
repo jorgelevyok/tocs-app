@@ -4,7 +4,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { deleteStored, materializeAppearance, persistConfirmationMedia } from "@/domain/media";
-import { createId, createWriteQueue, parseStoredData, STORAGE_KEYS, withoutConfirmation, withoutToc } from "@/domain/storage";
+import {
+  createId,
+  createWriteQueue,
+  parseStoredData,
+  STORAGE_KEYS,
+  withoutConfirmation,
+  withoutConfirmations,
+  withoutToc,
+} from "@/domain/storage";
 import type { Confirmation, StoredData, Toc, TocDraft } from "@/domain/types";
 
 const EMPTY: StoredData = { tocs: [], confirmations: [] };
@@ -17,7 +25,8 @@ type TocsContextValue = {
   setHistoryTocId: (tocId: string | null) => void;
   register: (tocId: string) => Confirmation;
   removeConfirmation: (id: string) => void;
-  removeToc: (id: string) => void;
+  removeConfirmations: (tocId: string | null) => void;
+  removeToc: (id: string, options?: { records?: boolean }) => void;
   saveDetails: (id: string, details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   addToc: (draft: TocDraft) => Promise<void>;
   updateToc: (id: string, draft: TocDraft) => Promise<void>;
@@ -86,18 +95,32 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
-  const removeToc = useCallback(
-    (id: string) => {
-      const current = stateRef.current;
-      const toc = current.tocs.find((item) => item.id === id);
-      if (toc?.appearance.kind === "image") deleteStored(toc.appearance.imageUri);
-      for (const confirmation of current.confirmations) {
-        if (confirmation.tocId !== id) continue;
+  const removeConfirmations = useCallback(
+    (tocId: string | null) => {
+      for (const confirmation of stateRef.current.confirmations) {
+        if (tocId && confirmation.tocId !== tocId) continue;
         deleteStored(confirmation.audioUri);
         deleteStored(confirmation.photoUri);
       }
+      commit((data) => withoutConfirmations(data, tocId));
+    },
+    [commit],
+  );
+
+  const removeToc = useCallback(
+    (id: string, options?: { records?: boolean }) => {
+      const current = stateRef.current;
+      const toc = current.tocs.find((item) => item.id === id);
+      if (toc?.appearance.kind === "image") deleteStored(toc.appearance.imageUri);
+      if (options?.records) {
+        for (const confirmation of current.confirmations) {
+          if (confirmation.tocId !== id) continue;
+          deleteStored(confirmation.audioUri);
+          deleteStored(confirmation.photoUri);
+        }
+      }
       setHistoryTocId((selected) => (selected === id ? null : selected));
-      commit((data) => withoutToc(data, id));
+      commit((data) => withoutToc(data, id, options));
     },
     [commit],
   );
@@ -160,12 +183,13 @@ export function TocsProvider({ children }: { children: ReactNode }) {
       setHistoryTocId,
       register,
       removeConfirmation,
+      removeConfirmations,
       removeToc,
       saveDetails,
       addToc,
       updateToc,
     }),
-    [ready, state, historyTocId, register, removeConfirmation, removeToc, saveDetails, addToc, updateToc],
+    [ready, state, historyTocId, register, removeConfirmation, removeConfirmations, removeToc, saveDetails, addToc, updateToc],
   );
 
   return <TocsContext.Provider value={value}>{children}</TocsContext.Provider>;

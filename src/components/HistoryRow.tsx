@@ -19,7 +19,7 @@ type HistoryRowProps = {
 export function HistoryRow({ confirmation, toc, onDelete }: HistoryRowProps) {
   const { colors } = useAppTheme();
   const time = formatTime(new Date(confirmation.at));
-  const name = toc?.name ?? "TOC";
+  const name = toc?.name ?? confirmation.tocName ?? "TOC";
 
   const confirmDelete = () => {
     Alert.alert("Borrar registro", `Se elimina el registro de «${name}» a las ${time}.`, [

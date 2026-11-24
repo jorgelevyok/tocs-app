@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Modal, Pressable, SectionList, StyleSheet, Text, View } from "react-native";
+import { Alert, Modal, Pressable, SectionList, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader, backToHome } from "@/components/AppHeader";
 import { AppIcon } from "@/components/AppIcon";
@@ -15,7 +15,7 @@ import { useTocs } from "@/state/tocs";
 
 export default function HistoryScreen() {
   const { colors } = useAppTheme();
-  const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation } = useTocs();
+  const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation, removeConfirmations } = useTocs();
   const [open, setOpen] = useState(false);
   const selected = tocs.find((toc) => toc.id === historyTocId) ?? null;
   const groups = useMemo(
@@ -26,6 +26,19 @@ export default function HistoryScreen() {
     () => groups.map((group) => ({ title: group.label, key: group.key, data: group.items })),
     [groups],
   );
+  const hasRecords = sections.some((section) => section.data.length > 0);
+
+  const clearRecords = () => {
+    const scope = selected ? `los registros de «${selected.name}»` : "todos los registros del historial";
+    Alert.alert("Borrar registros", `Se eliminan ${scope}. Los TOCs no se borran.`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Borrar",
+        style: "destructive",
+        onPress: () => removeConfirmations(selected?.id ?? null),
+      },
+    ]);
+  };
 
   return (
     <Screen testID="history-screen">
@@ -45,20 +58,34 @@ export default function HistoryScreen() {
         stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.content}
         ListHeaderComponent={
-          <View style={styles.filterRow}>
-            <Illustration width={72} height={72} />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Filtrar TOCs"
-              onPress={() => setOpen(true)}
-              testID="history-filter"
-              style={[styles.chip, { backgroundColor: colors.mint }]}
-            >
-              <Text style={[styles.chipText, { color: colors.onMint }]} numberOfLines={1}>
-                {selected?.name ?? "Todos los TOCs"}
-              </Text>
-              <AppIcon name="chevron" color={colors.onMint} size={18} />
-            </Pressable>
+          <View style={styles.header}>
+            <View style={styles.filterRow}>
+              <Illustration width={72} height={72} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Filtrar TOCs"
+                onPress={() => setOpen(true)}
+                testID="history-filter"
+                style={[styles.chip, { backgroundColor: colors.mint }]}
+              >
+                <Text style={[styles.chipText, { color: colors.onMint }]} numberOfLines={1}>
+                  {selected?.name ?? "Todos los TOCs"}
+                </Text>
+                <AppIcon name="chevron" color={colors.onMint} size={18} />
+              </Pressable>
+            </View>
+            {hasRecords ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Borrar todos los registros"
+                onPress={clearRecords}
+                testID="delete-all-records"
+                style={({ pressed }) => [styles.clearAll, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <AppIcon name="trash" color={colors.danger} size={18} />
+                <Text style={[styles.clearAllText, { color: colors.danger }]}>Borrar todos los registros</Text>
+              </Pressable>
+            ) : null}
           </View>
         }
         renderSectionHeader={({ section }) => (
@@ -129,11 +156,25 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 8,
   },
+  header: {
+    gap: 4,
+    marginBottom: 12,
+  },
   filterRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 12,
+  },
+  clearAll: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  clearAllText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
   chip: {
     flex: 1,

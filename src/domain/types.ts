@@ -20,6 +20,8 @@ export type Toc = {
 export type Confirmation = {
   id: string;
   tocId: string;
+  /** Nombre guardado para que el historial siga legible si el TOC ya no existe. */
+  tocName?: string;
   /** Instante local guardado como ISO. El día se calcula con el calendario del dispositivo. */
   at: string;
   note?: string;

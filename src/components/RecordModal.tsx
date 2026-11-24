@@ -8,12 +8,13 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BackHandler, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
-import { Illustration } from "@/components/Illustration";
+import { DeleteIllustration, Illustration } from "@/components/Illustration";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TextField } from "@/components/TextField";
@@ -27,9 +28,17 @@ type RecordModalProps = {
   onClose: () => void;
   onSave: (details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   onDeleteToc: () => void;
+  onDeleteTocAndRecords: () => void;
 };
 
-export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteToc }: RecordModalProps) {
+export function RecordModal({
+  confirmation,
+  tocName,
+  onClose,
+  onSave,
+  onDeleteToc,
+  onDeleteTocAndRecords,
+}: RecordModalProps) {
   const { colors } = useAppTheme();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
@@ -38,6 +47,7 @@ export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteTo
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const time = formatTime(new Date(confirmation.at));
 
   const close = () => {
@@ -47,6 +57,10 @@ export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteTo
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (confirmDelete) {
+        setConfirmDelete(false);
+        return true;
+      }
       close();
       return true;
     });
@@ -90,18 +104,10 @@ export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteTo
     }
   };
 
-  const deleteToc = () => {
-    Alert.alert("Borrar TOC", `Se elimina «${tocName}» y todos sus registros.`, [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Borrar",
-        style: "destructive",
-        onPress: () => {
-          if (recorderState.isRecording) void recorder.stop();
-          onDeleteToc();
-        },
-      },
-    ]);
+  const runDelete = (records: boolean) => {
+    if (recorderState.isRecording) void recorder.stop();
+    if (records) onDeleteTocAndRecords();
+    else onDeleteToc();
   };
 
   const save = async () => {
@@ -170,7 +176,7 @@ export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteTo
               accessibilityRole="button"
               accessibilityLabel={`Borrar ${tocName}`}
               disabled={saving}
-              onPress={deleteToc}
+              onPress={() => setConfirmDelete(true)}
               testID="delete-toc"
               style={({ pressed }) => [styles.delete, { opacity: saving ? 0.5 : pressed ? 0.7 : 1 }]}
             >
@@ -180,6 +186,55 @@ export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteTo
           </View>
         </View>
       </KeyboardAvoidingView>
+      <Modal
+        visible={confirmDelete}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        navigationBarTranslucent
+        presentationStyle="overFullScreen"
+        onRequestClose={() => setConfirmDelete(false)}
+      >
+        <StatusBar hidden />
+        <View style={[styles.confirmOverlay, { width: Dimensions.get("screen").width, height: Dimensions.get("screen").height }]}>
+          <Pressable
+            accessibilityLabel="Cancelar"
+            style={StyleSheet.absoluteFill}
+            onPress={() => setConfirmDelete(false)}
+          />
+          <View style={[styles.confirmCard, { backgroundColor: colors.surface }]} testID="delete-toc-dialog">
+            <DeleteIllustration />
+            <Text style={[styles.confirmTitle, { color: colors.text }]}>¿Desea borrar "{tocName}"?</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Borrar TOC"
+              onPress={() => runDelete(false)}
+              testID="delete-toc-only"
+              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text style={[styles.choiceLabel, { color: colors.danger }]}>Borrar TOC</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Borrar TOC y todos sus registros"
+              onPress={() => runDelete(true)}
+              testID="delete-toc-and-records"
+              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text style={[styles.choiceLabel, { color: colors.danger }]}>Borrar TOC y todos sus registros</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cancelar"
+              onPress={() => setConfirmDelete(false)}
+              testID="delete-toc-cancel"
+              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
+            >
+              <Text style={[styles.choiceLabel, { color: colors.text }]}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -281,5 +336,41 @@ const styles = StyleSheet.create({
   deleteLabel: {
     fontSize: 16,
     fontWeight: "700",
+  },
+  confirmOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    backgroundColor: "rgba(22, 32, 30, 0.55)",
+    justifyContent: "center",
+    padding: 24,
+  },
+  confirmCard: {
+    borderRadius: 24,
+    padding: 20,
+    alignItems: "center",
+    gap: 12,
+    zIndex: 21,
+    elevation: 21,
+  },
+  confirmTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  choice: {
+    alignSelf: "stretch",
+    minHeight: 48,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  choiceLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
   },
 });

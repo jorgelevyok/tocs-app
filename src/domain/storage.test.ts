@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseAppearance, parseStoredData, withoutConfirmation, withoutToc } from "./storage";
+import { parseAppearance, parseStoredData, withoutConfirmation, withoutConfirmations, withoutToc } from "./storage";
 import type { StoredData } from "./types";
 
 const stored: StoredData = {
@@ -62,11 +62,28 @@ test("deshacer quita solo la confirmación indicada", () => {
   assert.equal(next.tocs.length, 2);
 });
 
-test("borrar un TOC quita el TOC y sus registros", () => {
+test("borrar solo el TOC conserva sus registros con el nombre", () => {
   const next = withoutToc(stored, "gas");
   assert.deepEqual(
     next.tocs.map((toc) => toc.id),
     ["puerta"],
   );
+  assert.equal(next.confirmations.length, 1);
+  assert.equal(next.confirmations[0]?.tocName, "Cerré la llave de gas");
+});
+
+test("borrar un TOC y sus registros quita ambos", () => {
+  const next = withoutToc(stored, "gas", { records: true });
+  assert.deepEqual(
+    next.tocs.map((toc) => toc.id),
+    ["puerta"],
+  );
   assert.equal(next.confirmations.length, 0);
+});
+
+test("borrar registros puede ser todos o solo los de un TOC", () => {
+  const onlyGas = withoutConfirmations(stored, "gas");
+  assert.equal(onlyGas.confirmations.length, 0);
+  assert.equal(onlyGas.tocs.length, 2);
+  assert.equal(withoutConfirmations(stored, null).confirmations.length, 0);
 });

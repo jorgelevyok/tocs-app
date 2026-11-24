@@ -28,6 +28,8 @@ const lightLogo = require("../../assets/images/tocs-logo.png");
 const darkLogo = require("../../assets/images/tocs-dark-logo.png");
 const emptyLight = require("../../assets/images/empty-tocs.png");
 const emptyDark = require("../../assets/images/empty-tocs-dark.png");
+const deleteLight = require("../../assets/images/delete.png");
+const deleteDark = require("../../assets/images/delete-dark.png");
 
 export function BrandLogo() {
   const { scheme } = useAppTheme();
@@ -49,6 +51,18 @@ export function EmptyTocsIllustration() {
       height={260}
       source={scheme === "dark" ? emptyDark : emptyLight}
       label="Sin TOCs cargados"
+    />
+  );
+}
+
+export function DeleteIllustration() {
+  const { scheme } = useAppTheme();
+  return (
+    <Illustration
+      width={180}
+      height={180}
+      source={scheme === "dark" ? deleteDark : deleteLight}
+      label="Borrar TOC"
     />
   );
 }

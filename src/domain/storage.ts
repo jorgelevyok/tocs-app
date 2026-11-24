@@ -44,6 +44,7 @@ function isConfirmation(value: unknown): value is Confirmation {
   if (item.note !== undefined && typeof item.note !== "string") return false;
   if (item.audioUri !== undefined && typeof item.audioUri !== "string") return false;
   if (item.photoUri !== undefined && typeof item.photoUri !== "string") return false;
+  if (item.tocName !== undefined && typeof item.tocName !== "string") return false;
   return true;
 }
 
@@ -55,6 +56,7 @@ function cleanConfirmation(item: Confirmation): Confirmation {
     note: optionalText(item.note),
     audioUri: optionalText(item.audioUri),
     photoUri: optionalText(item.photoUri),
+    tocName: optionalText(item.tocName),
   };
 }
 
@@ -113,9 +115,27 @@ export function withoutConfirmation(data: StoredData, id: string): StoredData {
   };
 }
 
-export function withoutToc(data: StoredData, id: string): StoredData {
+export function withoutToc(data: StoredData, id: string, options?: { records?: boolean }): StoredData {
+  const toc = data.tocs.find((item) => item.id === id);
+  const tocs = data.tocs.filter((item) => item.id !== id);
+  if (options?.records) {
+    return {
+      tocs,
+      confirmations: data.confirmations.filter((item) => item.tocId !== id),
+    };
+  }
   return {
-    tocs: data.tocs.filter((toc) => toc.id !== id),
-    confirmations: data.confirmations.filter((item) => item.tocId !== id),
+    tocs,
+    confirmations: data.confirmations.map((item) =>
+      item.tocId === id ? { ...item, tocName: toc?.name ?? item.tocName } : item,
+    ),
+  };
+}
+
+/** tocId null borra todos los registros. Un id borra solo los de ese TOC. */
+export function withoutConfirmations(data: StoredData, tocId: string | null): StoredData {
+  return {
+    ...data,
+    confirmations: tocId ? data.confirmations.filter((item) => item.tocId !== tocId) : [],
   };
 }

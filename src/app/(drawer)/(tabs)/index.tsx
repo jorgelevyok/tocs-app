@@ -103,8 +103,12 @@ export default function HomeScreen() {
             setPending(null);
           }}
           onDeleteToc={() => {
+            removeToc(pending.tocId);
+            setPending(null);
+          }}
+          onDeleteTocAndRecords={() => {
             const tocId = pending.tocId;
-            removeToc(tocId);
+            removeToc(tocId, { records: true });
             setPending(null);
             setUndoId((current) => {
               if (!current) return null;
