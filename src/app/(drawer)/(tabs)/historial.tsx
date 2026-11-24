@@ -18,15 +18,25 @@ export default function HistoryScreen() {
   const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation, removeConfirmations } = useTocs();
   const [open, setOpen] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const selected = tocs.find((toc) => toc.id === historyTocId) ?? null;
   const groups = useMemo(
     () => groupConfirmations(confirmations, selected?.id ?? null),
     [confirmations, selected?.id],
   );
   const sections = useMemo(
-    () => groups.map((group) => ({ title: group.label, key: group.key, data: group.items })),
-    [groups],
+    () =>
+      groups.map((group) => ({
+        title: group.label,
+        key: group.key,
+        data: collapsed[group.key] ? [] : group.items,
+      })),
+    [groups, collapsed],
   );
+
+  const toggleDay = (key: string) => {
+    setCollapsed((current) => ({ ...current, [key]: !current[key] }));
+  };
   const hasRecords = sections.some((section) => section.data.length > 0);
 
   return (
@@ -36,6 +46,7 @@ export default function HistoryScreen() {
         sections={sections}
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled={false}
+        extraData={collapsed}
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
@@ -71,11 +82,24 @@ export default function HistoryScreen() {
             ) : null}
           </View>
         }
-        renderSectionHeader={({ section }) => (
-          <View style={[styles.day, { backgroundColor: colors.mint }]}>
-            <Text style={[styles.dayText, { color: colors.onMint }]}>{section.title}</Text>
-          </View>
-        )}
+        renderSectionHeader={({ section }) => {
+          const isCollapsed = Boolean(collapsed[section.key]);
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: !isCollapsed }}
+              accessibilityLabel={isCollapsed ? `Mostrar ${section.title}` : `Ocultar ${section.title}`}
+              onPress={() => toggleDay(section.key)}
+              testID={`history-day-${section.key}`}
+              style={[styles.day, { backgroundColor: colors.mint }]}
+            >
+              <Text style={[styles.dayText, { color: colors.onMint }]}>{section.title}</Text>
+              <View style={{ transform: [{ rotate: isCollapsed ? "0deg" : "180deg" }] }}>
+                <AppIcon name="chevron" color={colors.onMint} size={20} />
+              </View>
+            </Pressable>
+          );
+        }}
         renderItem={({ item }) => (
           <HistoryRow
             confirmation={item}
@@ -200,8 +224,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginTop: 8,
     marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
   dayText: {
+    flex: 1,
     fontSize: 16,
     fontWeight: "800",
   },

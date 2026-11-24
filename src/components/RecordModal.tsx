@@ -8,8 +8,8 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
-import { BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
@@ -18,13 +18,15 @@ import { RecordIllustration } from "@/components/Illustration";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TextField } from "@/components/TextField";
+import { TocVisual } from "@/components/TocVisual";
 import { formatTime } from "@/domain/dates";
-import type { Confirmation } from "@/domain/types";
+import type { Confirmation, TocAppearance } from "@/domain/types";
 import { useAppTheme } from "@/state/theme";
 
 type RecordModalProps = {
   confirmation: Confirmation;
   tocName: string;
+  appearance: TocAppearance;
   onClose: () => void;
   onSave: (details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   onDeleteToc: () => void;
@@ -34,6 +36,7 @@ type RecordModalProps = {
 export function RecordModal({
   confirmation,
   tocName,
+  appearance,
   onClose,
   onSave,
   onDeleteToc,
@@ -144,7 +147,10 @@ export function RecordModal({
               <RecordIllustration />
               <Text style={[styles.saved, { color: colors.text }]}>Registro guardado a las {time}</Text>
             </View>
-            <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
+            <View style={styles.nameRow}>
+              <TocVisual appearance={appearance} size={56} />
+              <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
+            </View>
             <TextField
               value={note}
               onChangeText={setNote}
@@ -156,11 +162,13 @@ export function RecordModal({
               <ActionButton
                 icon={recorderState.isRecording ? "pause" : "mic"}
                 label={recorderState.isRecording ? "Detener" : "Grabar audio"}
+                recording={recorderState.isRecording}
                 onPress={() => void record()}
                 testID="record-audio"
               />
               <ActionButton icon="image" label="Agregar foto" onPress={() => void pickPhoto()} testID="record-photo" />
             </View>
+            {recorderState.isRecording ? <RecordingIndicator /> : null}
             {audioUri ? <AudioClip uri={audioUri} onRemove={() => setAudioUri(null)} /> : null}
             {photoUri ? <PhotoThumb uri={photoUri} onRemove={() => setPhotoUri(null)} /> : null}
             {message ? <Text style={[styles.message, { color: colors.danger }]}>{message}</Text> : null}
@@ -206,28 +214,66 @@ export function RecordModal({
   );
 }
 
+function RecordingIndicator() {
+  const { colors } = useAppTheme();
+  const bars = useRef([new Animated.Value(0.35), new Animated.Value(0.35), new Animated.Value(0.35)]).current;
+
+  useEffect(() => {
+    const animations = bars.map((bar, index) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(index * 160),
+          Animated.timing(bar, { toValue: 1, duration: 280, useNativeDriver: true }),
+          Animated.timing(bar, { toValue: 0.35, duration: 280, useNativeDriver: true }),
+        ]),
+      ),
+    );
+    for (const animation of animations) animation.start();
+    return () => {
+      for (const animation of animations) animation.stop();
+    };
+  }, [bars]);
+
+  return (
+    <View style={styles.recording} accessibilityRole="text" accessibilityLiveRegion="polite" accessibilityLabel="Grabando audio">
+      <View style={styles.bars}>
+        {bars.map((bar, index) => (
+          <Animated.View
+            key={index}
+            style={[styles.bar, { backgroundColor: colors.danger, transform: [{ scaleY: bar }] }]}
+          />
+        ))}
+      </View>
+      <Text style={[styles.recordingText, { color: colors.danger }]}>Grabando</Text>
+    </View>
+  );
+}
+
 function ActionButton({
   icon,
   label,
   onPress,
   testID,
+  recording = false,
 }: {
   icon: "mic" | "pause" | "image";
   label: string;
   onPress: () => void;
   testID: string;
+  recording?: boolean;
 }) {
   const { colors } = useAppTheme();
+  const tone = recording ? colors.danger : colors.primary;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       testID={testID}
-      style={({ pressed }) => [styles.action, { borderColor: colors.border, opacity: pressed ? 0.75 : 1 }]}
+      style={({ pressed }) => [styles.action, { borderColor: recording ? colors.danger : colors.border, opacity: pressed ? 0.75 : 1 }]}
     >
-      <AppIcon name={icon} color={colors.primary} size={18} />
-      <Text style={[styles.actionLabel, { color: colors.text }]}>{label}</Text>
+      <AppIcon name={icon} color={tone} size={18} />
+      <Text style={[styles.actionLabel, { color: recording ? colors.danger : colors.text }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -261,8 +307,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   name: {
+    flex: 1,
     fontSize: 26,
+    fontWeight: "800",
+  },
+  recording: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    minHeight: 28,
+  },
+  bars: {
+    height: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  bar: {
+    width: 4,
+    height: 18,
+    borderRadius: 2,
+  },
+  recordingText: {
+    fontSize: 15,
     fontWeight: "800",
   },
   actions: {

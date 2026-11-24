@@ -98,6 +98,7 @@ export default function HomeScreen() {
         <RecordModal
           confirmation={pending}
           tocName={pendingToc.name}
+          appearance={pendingToc.appearance}
           onClose={() => setPending(null)}
           onSave={async (details) => {
             await saveDetails(pending.id, details);
