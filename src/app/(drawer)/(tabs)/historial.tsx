@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Alert, Modal, Pressable, SectionList, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, SectionList, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader, backToHome } from "@/components/AppHeader";
 import { AppIcon } from "@/components/AppIcon";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { HistoryRow } from "@/components/HistoryRow";
-import { Illustration } from "@/components/Illustration";
+import { HistoryIllustration } from "@/components/Illustration";
 import { Screen } from "@/components/Screen";
 import { groupConfirmations } from "@/domain/history";
-import { pushPath } from "@/lib/navigation";
 import { useAppTheme } from "@/state/theme";
 import { useTocs } from "@/state/tocs";
 
@@ -17,6 +17,7 @@ export default function HistoryScreen() {
   const { colors } = useAppTheme();
   const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation, removeConfirmations } = useTocs();
   const [open, setOpen] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const selected = tocs.find((toc) => toc.id === historyTocId) ?? null;
   const groups = useMemo(
     () => groupConfirmations(confirmations, selected?.id ?? null),
@@ -28,30 +29,9 @@ export default function HistoryScreen() {
   );
   const hasRecords = sections.some((section) => section.data.length > 0);
 
-  const clearRecords = () => {
-    const scope = selected ? `los registros de «${selected.name}»` : "todos los registros del historial";
-    Alert.alert("Borrar registros", `Se eliminan ${scope}. Los TOCs no se borran.`, [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Borrar",
-        style: "destructive",
-        onPress: () => removeConfirmations(selected?.id ?? null),
-      },
-    ]);
-  };
-
   return (
     <Screen testID="history-screen">
-      <AppHeader
-        mode="back"
-        title="Historial"
-        onBack={backToHome}
-        right={
-          selected
-            ? { label: `Editar ${selected.name}`, onPress: () => pushPath(`/toc/editar/${selected.id}`), testID: "edit-toc" }
-            : undefined
-        }
-      />
+      <AppHeader mode="back" title="Historial" onBack={backToHome} />
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
@@ -60,11 +40,14 @@ export default function HistoryScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <View style={styles.filterRow}>
-              <Illustration width={72} height={72} />
+              <HistoryIllustration />
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Filtrar TOCs"
-                onPress={() => setOpen(true)}
+                onPress={() => {
+                  setConfirmClear(false);
+                  setOpen(true);
+                }}
                 testID="history-filter"
                 style={[styles.chip, { backgroundColor: colors.mint }]}
               >
@@ -74,11 +57,11 @@ export default function HistoryScreen() {
                 <AppIcon name="chevron" color={colors.onMint} size={18} />
               </Pressable>
             </View>
-            {hasRecords ? (
+            {selected && hasRecords ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Borrar todos los registros"
-                onPress={clearRecords}
+                accessibilityLabel={`Borrar todos los registros de ${selected.name}`}
+                onPress={() => setConfirmClear(true)}
                 testID="delete-all-records"
                 style={({ pressed }) => [styles.clearAll, { opacity: pressed ? 0.7 : 1 }]}
               >
@@ -132,6 +115,26 @@ export default function HistoryScreen() {
           </View>
         </View>
       </Modal>
+      {selected ? (
+        <ConfirmDialog
+          visible={confirmClear}
+          title={`¿Desea borrar los registros de "${selected.name}"?`}
+          testID="delete-all-records-dialog"
+          onClose={() => setConfirmClear(false)}
+          actions={[
+            {
+              label: "Borrar todos los registros",
+              onPress: () => {
+                setConfirmClear(false);
+                removeConfirmations(selected.id);
+              },
+              testID: "confirm-delete-all-records",
+              danger: true,
+            },
+            { label: "Cancelar", onPress: () => setConfirmClear(false), testID: "cancel-delete-all-records" },
+          ]}
+        />
+      ) : null}
     </Screen>
   );
 }

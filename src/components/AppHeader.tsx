@@ -1,18 +1,11 @@
 "use client";
 
-import { DrawerActions } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { AppIconButton, PlusButton } from "@/components/AppIcon";
 import { BrandLogo } from "@/components/Illustration";
 import { goBack, navigatePath } from "@/lib/navigation";
 import { useAppTheme } from "@/state/theme";
-
-function useOpenDrawer() {
-  const navigation = useNavigation();
-  return () => navigation.dispatch(DrawerActions.toggleDrawer());
-}
 
 type AppHeaderProps =
   | { mode: "home"; onAdd: () => void }
@@ -25,12 +18,11 @@ type AppHeaderProps =
 
 export function AppHeader(props: AppHeaderProps) {
   const { colors } = useAppTheme();
-  const openDrawer = useOpenDrawer();
 
   if (props.mode === "home") {
     return (
       <View style={styles.home}>
-        <AppIconButton icon="menu" label="Abrir menú" color={colors.primary} onPress={openDrawer} testID="open-drawer" />
+        <View style={styles.spacer} />
         <View pointerEvents="none" style={styles.logoWrap}>
           <BrandLogo />
         </View>

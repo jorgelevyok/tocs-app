@@ -8,13 +8,13 @@ import {
   useAudioRecorderState,
 } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { AppIcon } from "@/components/AppIcon";
+import { AppIcon, AppIconButton } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
-import { DeleteIllustration, Illustration } from "@/components/Illustration";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { RecordIllustration } from "@/components/Illustration";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TextField } from "@/components/TextField";
@@ -29,6 +29,7 @@ type RecordModalProps = {
   onSave: (details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   onDeleteToc: () => void;
   onDeleteTocAndRecords: () => void;
+  onEdit: () => void;
 };
 
 export function RecordModal({
@@ -38,6 +39,7 @@ export function RecordModal({
   onSave,
   onDeleteToc,
   onDeleteTocAndRecords,
+  onEdit,
 }: RecordModalProps) {
   const { colors } = useAppTheme();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -110,6 +112,11 @@ export function RecordModal({
     else onDeleteToc();
   };
 
+  const edit = () => {
+    if (recorderState.isRecording) void recorder.stop();
+    onEdit();
+  };
+
   const save = async () => {
     setSaving(true);
     setMessage(null);
@@ -141,10 +148,19 @@ export function RecordModal({
         <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.titleRow}>
-              <Illustration width={72} height={72} label="Registro guardado" />
+              <RecordIllustration />
               <Text style={[styles.saved, { color: colors.text }]}>Registro guardado a las {time}</Text>
             </View>
-            <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
+              <AppIconButton
+                icon="edit"
+                label={`Editar ${tocName}`}
+                color={colors.primary}
+                onPress={edit}
+                testID="edit-toc"
+              />
+            </View>
             <TextField
               value={note}
               onChangeText={setNote}
@@ -186,55 +202,22 @@ export function RecordModal({
           </View>
         </View>
       </KeyboardAvoidingView>
-      <Modal
+      <ConfirmDialog
         visible={confirmDelete}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        navigationBarTranslucent
-        presentationStyle="overFullScreen"
-        onRequestClose={() => setConfirmDelete(false)}
-      >
-        <StatusBar hidden />
-        <View style={[styles.confirmOverlay, { width: Dimensions.get("screen").width, height: Dimensions.get("screen").height }]}>
-          <Pressable
-            accessibilityLabel="Cancelar"
-            style={StyleSheet.absoluteFill}
-            onPress={() => setConfirmDelete(false)}
-          />
-          <View style={[styles.confirmCard, { backgroundColor: colors.surface }]} testID="delete-toc-dialog">
-            <DeleteIllustration />
-            <Text style={[styles.confirmTitle, { color: colors.text }]}>¿Desea borrar "{tocName}"?</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Borrar TOC"
-              onPress={() => runDelete(false)}
-              testID="delete-toc-only"
-              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text style={[styles.choiceLabel, { color: colors.danger }]}>Borrar TOC</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Borrar TOC y todos sus registros"
-              onPress={() => runDelete(true)}
-              testID="delete-toc-and-records"
-              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text style={[styles.choiceLabel, { color: colors.danger }]}>Borrar TOC y todos sus registros</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Cancelar"
-              onPress={() => setConfirmDelete(false)}
-              testID="delete-toc-cancel"
-              style={({ pressed }) => [styles.choice, { borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-            >
-              <Text style={[styles.choiceLabel, { color: colors.text }]}>Cancelar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+        title={`¿Desea borrar "${tocName}"?`}
+        testID="delete-toc-dialog"
+        onClose={() => setConfirmDelete(false)}
+        actions={[
+          { label: "Borrar TOC", onPress: () => runDelete(false), testID: "delete-toc-only", danger: true },
+          {
+            label: "Borrar TOC y todos sus registros",
+            onPress: () => runDelete(true),
+            testID: "delete-toc-and-records",
+            danger: true,
+          },
+          { label: "Cancelar", onPress: () => setConfirmDelete(false), testID: "delete-toc-cancel" },
+        ]}
+      />
     </View>
   );
 }
@@ -294,7 +277,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   name: {
+    flex: 1,
     fontSize: 26,
     fontWeight: "800",
   },
@@ -336,41 +325,5 @@ const styles = StyleSheet.create({
   deleteLabel: {
     fontSize: 16,
     fontWeight: "700",
-  },
-  confirmOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    backgroundColor: "rgba(22, 32, 30, 0.55)",
-    justifyContent: "center",
-    padding: 24,
-  },
-  confirmCard: {
-    borderRadius: 24,
-    padding: 20,
-    alignItems: "center",
-    gap: 12,
-    zIndex: 21,
-    elevation: 21,
-  },
-  confirmTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-  choice: {
-    alignSelf: "stretch",
-    minHeight: 48,
-    borderWidth: 1.5,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  choiceLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
   },
 });

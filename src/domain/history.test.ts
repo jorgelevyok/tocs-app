@@ -11,15 +11,15 @@ function confirmation(partial: Partial<Confirmation> & Pick<Confirmation, "id" |
   return { tocId: "gas", ...partial };
 }
 
-test("la hora local se muestra en 24 horas", () => {
-  assert.equal(formatTime(new Date(2026, 10, 24, 8, 42)), "08:42");
+test("la hora local se muestra en 24 horas con segundos", () => {
+  assert.equal(formatTime(new Date(2026, 10, 24, 8, 42, 7)), "08:42:07");
 });
 
 test("hoy y ayer usan el calendario local", () => {
   assert.equal(formatDayHeading(new Date(2026, 10, 24, 8, 42), now), "Hoy, 24 de noviembre");
   assert.equal(formatDayHeading(new Date(2026, 10, 23, 21, 10), now), "Ayer, 23 de noviembre");
   assert.match(formatDayHeading(new Date(2026, 10, 22, 9, 15), now), /22 de noviembre/);
-  assert.equal(formatConfirmationStamp(new Date(2026, 10, 24, 8, 36), now), "Hoy, 08:36");
+  assert.equal(formatConfirmationStamp(new Date(2026, 10, 24, 8, 36, 12), now), "Hoy, 08:36:12");
 });
 
 test("dos confirmaciones del mismo TOC el mismo día quedan separadas y la más nueva va primero", () => {

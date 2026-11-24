@@ -18,6 +18,7 @@ export function formatTime(date: Date): string {
   return new Intl.DateTimeFormat("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hourCycle: "h23",
   })
     .format(date)
@@ -34,7 +35,7 @@ export function formatDayHeading(date: Date, now: Date = new Date()): string {
   return `${capitalize(weekday)}, ${day}`;
 }
 
-/** Fecha corta de la tarjeta, por ejemplo "Hoy, 08:42". */
+/** Fecha corta de la tarjeta, por ejemplo "Hoy, 08:42:15". */
 export function formatConfirmationStamp(date: Date, now: Date = new Date()): string {
   const time = formatTime(date);
   const diff = localDayDiff(now, date);

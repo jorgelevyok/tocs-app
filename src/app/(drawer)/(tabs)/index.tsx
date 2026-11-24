@@ -116,6 +116,11 @@ export default function HomeScreen() {
               return confirmation?.tocId === tocId ? null : current;
             });
           }}
+          onEdit={() => {
+            const tocId = pending.tocId;
+            setPending(null);
+            pushPath(`/toc/editar/${tocId}`);
+          }}
         />
       ) : null}
     </Screen>

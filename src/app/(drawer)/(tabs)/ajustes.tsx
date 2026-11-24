@@ -3,7 +3,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader, backToHome } from "@/components/AppHeader";
-import { Illustration } from "@/components/Illustration";
+import { AppearanceIllustration } from "@/components/Illustration";
 import { Screen } from "@/components/Screen";
 import type { AppearancePreference } from "@/domain/types";
 import { useAppTheme } from "@/state/theme";
@@ -20,7 +20,7 @@ export default function SettingsScreen() {
   return (
     <Screen testID="settings-screen">
       <AppHeader mode="back" title="Ajustes" onBack={backToHome} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Text style={[styles.section, { color: colors.text }]}>Apariencia</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {OPTIONS.map((option) => {
@@ -44,7 +44,7 @@ export default function SettingsScreen() {
           })}
         </View>
         <View style={styles.mascot}>
-          <Illustration width={220} height={180} />
+          <AppearanceIllustration />
         </View>
       </ScrollView>
     </Screen>
@@ -52,9 +52,12 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 12,
     flexGrow: 1,
   },
   section: {
@@ -92,9 +95,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   mascot: {
-    flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 24,
+    flex: 1,
+    marginTop: 12,
+    minHeight: 280,
   },
 });

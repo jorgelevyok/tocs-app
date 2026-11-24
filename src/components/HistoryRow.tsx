@@ -1,9 +1,11 @@
 "use client";
 
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { PhotoThumb } from "@/components/PhotoThumb";
 import { TocVisual } from "@/components/TocVisual";
 import { formatTime } from "@/domain/dates";
@@ -18,15 +20,9 @@ type HistoryRowProps = {
 
 export function HistoryRow({ confirmation, toc, onDelete }: HistoryRowProps) {
   const { colors } = useAppTheme();
+  const [confirming, setConfirming] = useState(false);
   const time = formatTime(new Date(confirmation.at));
   const name = toc?.name ?? confirmation.tocName ?? "TOC";
-
-  const confirmDelete = () => {
-    Alert.alert("Borrar registro", `Se elimina el registro de «${name}» a las ${time}.`, [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Borrar", style: "destructive", onPress: onDelete },
-    ]);
-  };
 
   return (
     <View style={styles.row} testID={`history-${confirmation.id}`}>
@@ -43,7 +39,7 @@ export function HistoryRow({ confirmation, toc, onDelete }: HistoryRowProps) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Borrar registro de ${name}`}
-            onPress={confirmDelete}
+            onPress={() => setConfirming(true)}
             hitSlop={8}
             testID={`delete-history-${confirmation.id}`}
             style={({ pressed }) => [styles.delete, { opacity: pressed ? 0.6 : 1 }]}
@@ -55,6 +51,26 @@ export function HistoryRow({ confirmation, toc, onDelete }: HistoryRowProps) {
         {confirmation.audioUri ? <AudioClip uri={confirmation.audioUri} /> : null}
         {confirmation.photoUri ? <PhotoThumb uri={confirmation.photoUri} /> : null}
       </View>
+      {confirming ? (
+        <ConfirmDialog
+          visible
+          title={`¿Desea borrar el registro de "${name}" a las ${time}?`}
+          testID={`delete-history-dialog-${confirmation.id}`}
+          onClose={() => setConfirming(false)}
+          actions={[
+            {
+              label: "Borrar registro",
+              onPress: () => {
+                setConfirming(false);
+                onDelete();
+              },
+              testID: `confirm-delete-history-${confirmation.id}`,
+              danger: true,
+            },
+            { label: "Cancelar", onPress: () => setConfirming(false), testID: `cancel-delete-history-${confirmation.id}` },
+          ]}
+        />
+      ) : null}
     </View>
   );
 }
