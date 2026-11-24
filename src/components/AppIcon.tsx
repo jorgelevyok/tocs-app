@@ -1,7 +1,10 @@
 "use client";
 
+import { loadAsync } from "expo-font";
+import { MaterialSymbols_400Regular } from "@expo-google-fonts/material-symbols/400Regular";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
-import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { useEffect, useState } from "react";
+import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import type { TocIconName } from "@/domain/types";
 import { useAppTheme } from "@/state/theme";
@@ -16,6 +19,7 @@ export type IconName =
   | "clock"
   | "mic"
   | "image"
+  | "camera"
   | "play"
   | "pause"
   | "close"
@@ -39,6 +43,7 @@ const ICONS: Record<IconName, { ios: string; android: string }> = {
   check: { ios: "checkmark", android: "check" },
   mic: { ios: "mic.fill", android: "mic" },
   image: { ios: "photo", android: "image" },
+  camera: { ios: "camera.fill", android: "photo_camera" },
   play: { ios: "play.fill", android: "play_arrow" },
   pause: { ios: "pause.fill", android: "pause" },
   close: { ios: "xmark", android: "close" },
@@ -54,14 +59,88 @@ type AppIconProps = {
   size?: number;
 };
 
+const MATERIAL_FONT = "MaterialSymbols_400Regular";
+
+const MATERIAL_GLYPHS: Record<string, number> = {
+  menu: 58834,
+  add: 57669,
+  arrow_back: 58820,
+  home: 59530,
+  history: 59529,
+  settings: 59576,
+  schedule: 59573,
+  local_fire_department: 61269,
+  lock: 59543,
+  water_drop: 59288,
+  eco: 59957,
+  check: 58826,
+  mic: 57385,
+  image: 58356,
+  photo_camera: 58386,
+  play_arrow: 57399,
+  pause: 57396,
+  close: 58829,
+  edit: 58313,
+  expand_more: 58831,
+  check_circle: 59500,
+  delete: 59506,
+};
+
+let materialFont: Promise<void> | null = null;
+
+function loadMaterialFont() {
+  materialFont ??= loadAsync({ [MATERIAL_FONT]: MaterialSymbols_400Regular }).then(() => undefined);
+  return materialFont;
+}
+
 export function AppIcon({ name, color, size = 24 }: AppIconProps) {
   const spec = ICONS[name];
+  const [ready, setReady] = useState(Platform.OS === "ios");
+
+  useEffect(() => {
+    if (Platform.OS === "ios") return;
+    let active = true;
+    loadMaterialFont()
+      .then(() => {
+        if (active) setReady(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (Platform.OS === "ios") {
+    return (
+      <SymbolView
+        name={{ ios: spec.ios, android: spec.android, web: spec.android } as unknown as SymbolViewProps["name"]}
+        tintColor={color}
+        size={size}
+      />
+    );
+  }
+
+  const glyph = MATERIAL_GLYPHS[spec.android];
+  if (!ready || glyph === undefined) {
+    return <View style={{ width: size, height: size }} />;
+  }
+
   return (
-    <SymbolView
-      name={{ ios: spec.ios, android: spec.android, web: spec.android } as unknown as SymbolViewProps["name"]}
-      tintColor={color}
-      size={size}
-    />
+    <Text
+      style={{
+        width: size,
+        height: size,
+        fontFamily: MATERIAL_FONT,
+        fontSize: size,
+        lineHeight: size,
+        color,
+        textAlign: "center",
+        textAlignVertical: "center",
+        includeFontPadding: false,
+      }}
+    >
+      {String.fromCharCode(glyph)}
+    </Text>
   );
 }
 

@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
-import { Illustration } from "@/components/Illustration";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { TextField } from "@/components/TextField";
 import { TocCard } from "@/components/TocCard";
@@ -38,13 +37,20 @@ export function TocForm({ initial, subtitle, submitLabel, onSubmit }: TocFormPro
         ? { kind: "none" }
         : { kind: "icon", icon };
 
-  const pickImage = async () => {
+  const chooseImage = async (source: "library" | "camera") => {
     setError(null);
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        quality: 0.8,
-      });
+      if (source === "camera") {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+          setError("No se pudo usar la cámara.");
+          return;
+        }
+      }
+      const result =
+        source === "camera"
+          ? await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.8 })
+          : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
       if (result.canceled) return;
       const uri = result.assets[0]?.uri;
       if (!uri) return;
@@ -52,7 +58,7 @@ export function TocForm({ initial, subtitle, submitLabel, onSubmit }: TocFormPro
       setImagePersisted(false);
       setMode("image");
     } catch {
-      setError("No se pudo abrir la galería.");
+      setError(source === "camera" ? "No se pudo usar la cámara." : "No se pudo abrir la galería.");
     }
   };
 
@@ -98,43 +104,55 @@ export function TocForm({ initial, subtitle, submitLabel, onSubmit }: TocFormPro
         {mode === "icon" ? (
           <View style={styles.block}>
             <Text style={[styles.blockTitle, { color: colors.text }]}>Elegí un ícono</Text>
-            <View style={styles.grid}>
-              {TOC_ICONS.map((item) => {
-                const selected = item === icon;
-                return (
-                  <Pressable
-                    key={item}
-                    accessibilityRole="button"
-                    accessibilityLabel={item}
-                    accessibilityState={{ selected }}
-                    testID={`icon-${item}`}
-                    onPress={() => setIcon(item)}
-                    style={[
-                      styles.iconCell,
-                      {
-                        backgroundColor: selected ? colors.mint : colors.surface,
-                        borderColor: selected ? colors.primary : colors.border,
-                      },
-                    ]}
-                  >
-                    <AppIcon name={item} color={colors.primary} size={26} />
-                  </Pressable>
-                );
-              })}
+            <View>
+              {[TOC_ICONS.slice(0, 3), TOC_ICONS.slice(3)].map((row) => (
+                <View key={row.join("-")} style={styles.iconRow}>
+                  {row.map((item) => {
+                    const selected = item === icon;
+                    return (
+                      <View key={item} style={styles.iconCell}>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={item}
+                          accessibilityState={{ selected }}
+                          testID={`icon-${item}`}
+                          onPress={() => setIcon(item)}
+                          style={[
+                            styles.iconGlyph,
+                            {
+                              backgroundColor: selected ? colors.mint : colors.surface,
+                              borderColor: selected ? colors.primary : colors.border,
+                            },
+                          ]}
+                        >
+                          <AppIcon name={item} color={colors.primary} size={28} />
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           </View>
         ) : null}
         {mode === "image" ? (
-          <PrimaryButton label={imageUri ? "Cambiar imagen" : "Elegir de la galería"} onPress={() => void pickImage()} testID="pick-image" />
+          <View style={styles.imageActions}>
+            <ImageChoice
+              icon="image"
+              label="Elegir de la galería"
+              onPress={() => void chooseImage("library")}
+              testID="pick-image"
+            />
+            <ImageChoice icon="camera" label="Tomar foto" onPress={() => void chooseImage("camera")} testID="take-photo" />
+          </View>
         ) : null}
         <View style={styles.block}>
           <Text style={[styles.blockTitle, { color: colors.text }]}>Vista previa</Text>
-          <View style={styles.preview}>
-            <View style={styles.previewCard}>
-              <TocCard name={name.trim() || "Nombre del TOC"} appearance={mode === "image" && !imageUri ? { kind: "none" } : appearance} subtitle={subtitle} />
-            </View>
-            <Illustration width={78} height={78} />
-          </View>
+          <TocCard
+            name={name.trim() || "Nombre del TOC"}
+            appearance={mode === "image" && !imageUri ? { kind: "none" } : appearance}
+            subtitle={subtitle}
+          />
         </View>
         {error ? <Text style={[styles.error, { color: colors.danger }]}>{error}</Text> : null}
       </ScrollView>
@@ -147,6 +165,32 @@ export function TocForm({ initial, subtitle, submitLabel, onSubmit }: TocFormPro
         />
       </View>
     </View>
+  );
+}
+
+function ImageChoice({
+  icon,
+  label,
+  onPress,
+  testID,
+}: {
+  icon: "image" | "camera";
+  label: string;
+  onPress: () => void;
+  testID: string;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      testID={testID}
+      style={({ pressed }) => [styles.imageChoice, { borderColor: colors.border, opacity: pressed ? 0.75 : 1 }]}
+    >
+      <AppIcon name={icon} color={colors.primary} size={18} />
+      <Text style={[styles.imageChoiceLabel, { color: colors.text }]}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -214,27 +258,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-  grid: {
+  iconRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
   },
   iconCell: {
-    width: "30%",
+    flex: 1,
     aspectRatio: 1,
-    maxWidth: 108,
+    padding: 6,
+  },
+  iconGlyph: {
+    flex: 1,
     borderRadius: 18,
     borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
-  preview: {
+  imageActions: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
-  previewCard: {
+  imageChoice: {
     flex: 1,
+    minHeight: 64,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+  },
+  imageChoiceLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
   },
   error: {
     fontSize: 14,

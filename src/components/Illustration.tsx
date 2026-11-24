@@ -36,6 +36,8 @@ const detailLight = require("../../assets/images/toc-detail.png");
 const detailDark = require("../../assets/images/toc-detail-dark.png");
 const appearanceLight = require("../../assets/images/appearance.png");
 const appearanceDark = require("../../assets/images/appearance-dark.png");
+const newTocLight = require("../../assets/images/new-toc.png");
+const newTocDark = require("../../assets/images/new-toc-dark.png");
 
 export function BrandLogo() {
   const { scheme } = useAppTheme();
@@ -93,6 +95,18 @@ export function AppearanceIllustration() {
       style={styles.fill}
       contentFit="contain"
       accessibilityLabel="Apariencia"
+    />
+  );
+}
+
+export function NewTocIllustration() {
+  const { scheme } = useAppTheme();
+  return (
+    <Illustration
+      width={92}
+      height={92}
+      source={scheme === "dark" ? newTocDark : newTocLight}
+      label="Nuevo TOC"
     />
   );
 }

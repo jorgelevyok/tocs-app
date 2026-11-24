@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { AppIconButton, PlusButton } from "@/components/AppIcon";
@@ -14,6 +15,7 @@ type AppHeaderProps =
       title: string;
       onBack?: () => void;
       right?: { label: string; onPress: () => void; testID?: string };
+      accessory?: ReactNode;
     };
 
 export function AppHeader(props: AppHeaderProps) {
@@ -40,9 +42,11 @@ export function AppHeader(props: AppHeaderProps) {
         onPress={props.onBack ?? goBack}
         testID="go-back"
       />
-      <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+      <Text style={[styles.title, { color: colors.text }, props.accessory ? styles.titleShrink : styles.titleFlex]} numberOfLines={1}>
         {props.title}
       </Text>
+      {props.accessory ? <View style={styles.grow} /> : null}
+      {props.accessory}
       {props.right ? (
         <AppIconButton
           icon="edit"
@@ -51,7 +55,7 @@ export function AppHeader(props: AppHeaderProps) {
           onPress={props.right.onPress}
           testID={props.right.testID}
         />
-      ) : (
+      ) : props.accessory ? null : (
         <View style={styles.spacer} />
       )}
     </View>
@@ -84,9 +88,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    flex: 1,
     fontSize: 28,
     fontWeight: "800",
+  },
+  titleShrink: {
+    flexShrink: 1,
+  },
+  titleFlex: {
+    flex: 1,
+  },
+  grow: {
+    flex: 1,
   },
   spacer: {
     width: 44,

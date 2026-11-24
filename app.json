@@ -37,6 +37,7 @@
         "expo-image-picker",
         {
           "photosPermission": "TOCs usa una foto de la galería para la tarjeta o para un registro.",
+          "cameraPermission": "TOCs usa la cámara para la foto de la tarjeta.",
           "microphonePermission": false
         }
       ],
