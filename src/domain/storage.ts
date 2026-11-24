@@ -132,6 +132,14 @@ export function withoutToc(data: StoredData, id: string, options?: { records?: b
   };
 }
 
+export function withoutIds(data: StoredData, ids: string[]): StoredData {
+  const drop = new Set(ids);
+  return {
+    ...data,
+    confirmations: data.confirmations.filter((item) => !drop.has(item.id)),
+  };
+}
+
 /** tocId null borra todos los registros. Un id borra solo los de ese TOC. */
 export function withoutConfirmations(data: StoredData, tocId: string | null): StoredData {
   return {

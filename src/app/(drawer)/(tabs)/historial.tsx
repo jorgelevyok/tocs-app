@@ -15,9 +15,10 @@ import { useTocs } from "@/state/tocs";
 
 export default function HistoryScreen() {
   const { colors } = useAppTheme();
-  const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation, removeConfirmations } = useTocs();
+  const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation, removeConfirmations, removeConfirmationsById } = useTocs();
   const [open, setOpen] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmDay, setConfirmDay] = useState<{ title: string; ids: string[] } | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const selected = tocs.find((toc) => toc.id === historyTocId) ?? null;
   const groups = useMemo(
@@ -29,6 +30,7 @@ export default function HistoryScreen() {
       groups.map((group) => ({
         title: group.label,
         key: group.key,
+        recordIds: group.items.map((item) => item.id),
         data: collapsed[group.key] ? [] : group.items,
       })),
     [groups, collapsed],
@@ -37,7 +39,7 @@ export default function HistoryScreen() {
   const toggleDay = (key: string) => {
     setCollapsed((current) => ({ ...current, [key]: !current[key] }));
   };
-  const hasRecords = sections.some((section) => section.data.length > 0);
+  const hasRecords = groups.some((group) => group.items.length > 0);
 
   return (
     <Screen testID="history-screen">
@@ -85,19 +87,31 @@ export default function HistoryScreen() {
         renderSectionHeader={({ section }) => {
           const isCollapsed = Boolean(collapsed[section.key]);
           return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: !isCollapsed }}
-              accessibilityLabel={isCollapsed ? `Mostrar ${section.title}` : `Ocultar ${section.title}`}
-              onPress={() => toggleDay(section.key)}
-              testID={`history-day-${section.key}`}
-              style={[styles.day, { backgroundColor: colors.mint }]}
-            >
-              <Text style={[styles.dayText, { color: colors.onMint }]}>{section.title}</Text>
-              <View style={{ transform: [{ rotate: isCollapsed ? "0deg" : "180deg" }] }}>
-                <AppIcon name="chevron" color={colors.onMint} size={20} />
-              </View>
-            </Pressable>
+            <View style={[styles.day, { backgroundColor: colors.mint }]}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: !isCollapsed }}
+                accessibilityLabel={isCollapsed ? `Mostrar ${section.title}` : `Ocultar ${section.title}`}
+                onPress={() => toggleDay(section.key)}
+                testID={`history-day-${section.key}`}
+                style={styles.dayMain}
+              >
+                <Text style={[styles.dayText, { color: colors.onMint }]}>{section.title}</Text>
+                <View style={{ transform: [{ rotate: isCollapsed ? "0deg" : "180deg" }] }}>
+                  <AppIcon name="chevron" color={colors.onMint} size={20} />
+                </View>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Borrar registros de ${section.title}`}
+                onPress={() => setConfirmDay({ title: section.title, ids: section.recordIds })}
+                hitSlop={6}
+                testID={`delete-day-${section.key}`}
+                style={({ pressed }) => [styles.dayDelete, { opacity: pressed ? 0.6 : 1 }]}
+              >
+                <AppIcon name="trash" color={colors.danger} size={18} />
+              </Pressable>
+            </View>
           );
         }}
         renderItem={({ item }) => (
@@ -156,6 +170,26 @@ export default function HistoryScreen() {
               danger: true,
             },
             { label: "Cancelar", onPress: () => setConfirmClear(false), testID: "cancel-delete-all-records" },
+          ]}
+        />
+      ) : null}
+      {confirmDay ? (
+        <ConfirmDialog
+          visible
+          title={`¿Desea borrar los registros de ${confirmDay.title}?`}
+          testID="delete-day-dialog"
+          onClose={() => setConfirmDay(null)}
+          actions={[
+            {
+              label: "Borrar registros del día",
+              onPress: () => {
+                removeConfirmationsById(confirmDay.ids);
+                setConfirmDay(null);
+              },
+              testID: "confirm-delete-day",
+              danger: true,
+            },
+            { label: "Cancelar", onPress: () => setConfirmDay(null), testID: "cancel-delete-day" },
           ]}
         />
       ) : null}
@@ -220,14 +254,28 @@ const styles = StyleSheet.create({
   },
   day: {
     borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingLeft: 14,
+    paddingRight: 8,
+    paddingVertical: 6,
     marginTop: 8,
     marginBottom: 8,
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
+  },
+  dayMain: {
+    flex: 1,
+    minHeight: 36,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
+  },
+  dayDelete: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
   dayText: {
     flex: 1,

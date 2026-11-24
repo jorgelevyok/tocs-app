@@ -11,6 +11,7 @@ import {
   STORAGE_KEYS,
   withoutConfirmation,
   withoutConfirmations,
+  withoutIds,
   withoutToc,
 } from "@/domain/storage";
 import type { Confirmation, StoredData, Toc, TocDraft } from "@/domain/types";
@@ -26,6 +27,7 @@ type TocsContextValue = {
   register: (tocId: string) => Confirmation;
   removeConfirmation: (id: string) => void;
   removeConfirmations: (tocId: string | null) => void;
+  removeConfirmationsById: (ids: string[]) => void;
   removeToc: (id: string, options?: { records?: boolean }) => void;
   saveDetails: (id: string, details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   addToc: (draft: TocDraft) => Promise<void>;
@@ -107,6 +109,19 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  const removeConfirmationsById = useCallback(
+    (ids: string[]) => {
+      const drop = new Set(ids);
+      for (const confirmation of stateRef.current.confirmations) {
+        if (!drop.has(confirmation.id)) continue;
+        deleteStored(confirmation.audioUri);
+        deleteStored(confirmation.photoUri);
+      }
+      commit((data) => withoutIds(data, ids));
+    },
+    [commit],
+  );
+
   const removeToc = useCallback(
     (id: string, options?: { records?: boolean }) => {
       const current = stateRef.current;
@@ -184,12 +199,13 @@ export function TocsProvider({ children }: { children: ReactNode }) {
       register,
       removeConfirmation,
       removeConfirmations,
+      removeConfirmationsById,
       removeToc,
       saveDetails,
       addToc,
       updateToc,
     }),
-    [ready, state, historyTocId, register, removeConfirmation, removeConfirmations, removeToc, saveDetails, addToc, updateToc],
+    [ready, state, historyTocId, register, removeConfirmation, removeConfirmations, removeConfirmationsById, removeToc, saveDetails, addToc, updateToc],
   );
 
   return <TocsContext.Provider value={value}>{children}</TocsContext.Provider>;

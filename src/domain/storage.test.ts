@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseAppearance, parseStoredData, withoutConfirmation, withoutConfirmations, withoutToc } from "./storage";
+import { parseAppearance, parseStoredData, withoutConfirmation, withoutConfirmations, withoutIds, withoutToc } from "./storage";
 import type { StoredData } from "./types";
 
 const stored: StoredData = {
@@ -79,6 +79,12 @@ test("borrar un TOC y sus registros quita ambos", () => {
     ["puerta"],
   );
   assert.equal(next.confirmations.length, 0);
+});
+
+test("borrar varios registros deja el resto", () => {
+  const next = withoutIds(stored, ["c1"]);
+  assert.equal(next.confirmations.length, 0);
+  assert.equal(next.tocs.length, 2);
 });
 
 test("borrar registros puede ser todos o solo los de un TOC", () => {

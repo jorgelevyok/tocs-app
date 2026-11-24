@@ -7,9 +7,10 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from "expo-audio";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useRef, useState } from "react";
-import { Animated, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, BackHandler, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
@@ -51,6 +52,7 @@ export function RecordModal({
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [visualOpen, setVisualOpen] = useState(false);
   const time = formatTime(new Date(confirmation.at));
 
   const close = () => {
@@ -148,7 +150,14 @@ export function RecordModal({
               <Text style={[styles.saved, { color: colors.text }]}>Registro guardado a las {time}</Text>
             </View>
             <View style={styles.nameRow}>
-              <TocVisual appearance={appearance} size={56} />
+              <Pressable
+                accessibilityRole="imagebutton"
+                accessibilityLabel={`Ver imagen de ${tocName}`}
+                disabled={appearance.kind === "none"}
+                onPress={() => setVisualOpen(true)}
+              >
+                <TocVisual appearance={appearance} size={56} />
+              </Pressable>
               <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
             </View>
             <TextField
@@ -194,6 +203,19 @@ export function RecordModal({
           </View>
         </View>
       </KeyboardAvoidingView>
+      <Modal visible={visualOpen} transparent animationType="fade" onRequestClose={() => setVisualOpen(false)}>
+        <Pressable
+          accessibilityLabel="Cerrar imagen"
+          style={[styles.lightbox, { backgroundColor: colors.overlay }]}
+          onPress={() => setVisualOpen(false)}
+        >
+          {appearance.kind === "image" ? (
+            <Image source={{ uri: appearance.imageUri }} style={styles.fullImage} contentFit="contain" />
+          ) : (
+            <TocVisual appearance={appearance} size={220} />
+          )}
+        </Pressable>
+      </Modal>
       <ConfirmDialog
         visible={confirmDelete}
         title={`¿Desea borrar "${tocName}"?`}
@@ -316,6 +338,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 26,
     fontWeight: "800",
+  },
+  lightbox: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  fullImage: {
+    width: "100%",
+    height: "80%",
   },
   recording: {
     flexDirection: "row",
