@@ -21,7 +21,8 @@ export type IconName =
   | "close"
   | "edit"
   | "chevron"
-  | "checkCircle";
+  | "checkCircle"
+  | "trash";
 
 const ICONS: Record<IconName, { ios: string; android: string }> = {
   menu: { ios: "line.3.horizontal", android: "menu" },
@@ -44,6 +45,7 @@ const ICONS: Record<IconName, { ios: string; android: string }> = {
   edit: { ios: "pencil", android: "edit" },
   chevron: { ios: "chevron.down", android: "expand_more" },
   checkCircle: { ios: "checkmark.circle.fill", android: "check_circle" },
+  trash: { ios: "trash", android: "delete" },
 };
 
 type AppIconProps = {

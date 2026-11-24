@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parseAppearance, parseStoredData, withoutConfirmation } from "./storage";
+import { parseAppearance, parseStoredData, withoutConfirmation, withoutToc } from "./storage";
 import type { StoredData } from "./types";
 
 const stored: StoredData = {
@@ -60,4 +60,13 @@ test("deshacer quita solo la confirmación indicada", () => {
     ["c1"],
   );
   assert.equal(next.tocs.length, 2);
+});
+
+test("borrar un TOC quita el TOC y sus registros", () => {
+  const next = withoutToc(stored, "gas");
+  assert.deepEqual(
+    next.tocs.map((toc) => toc.id),
+    ["puerta"],
+  );
+  assert.equal(next.confirmations.length, 0);
 });

@@ -24,28 +24,36 @@ export function Illustration({ width, height, source, label }: IllustrationProps
   return <Image source={source} style={{ width, height }} contentFit="contain" accessibilityLabel={label} />;
 }
 
+const lightLogo = require("../../assets/images/tocs-logo.png");
+const darkLogo = require("../../assets/images/tocs-dark-logo.png");
+const emptyLight = require("../../assets/images/empty-tocs.png");
+const emptyDark = require("../../assets/images/empty-tocs-dark.png");
+
 export function BrandLogo() {
   const { scheme } = useAppTheme();
   return (
-    <View style={[styles.logoPlate, scheme === "dark" && styles.logoPlateDark]}>
-      <Image
-        source={require("../../assets/images/tocs-logo.png")}
-        style={styles.logo}
-        contentFit="contain"
-        accessibilityLabel="TOCs"
-      />
-    </View>
+    <Image
+      source={scheme === "dark" ? darkLogo : lightLogo}
+      style={styles.logo}
+      contentFit="contain"
+      accessibilityLabel="TOCs"
+    />
+  );
+}
+
+export function EmptyTocsIllustration() {
+  const { scheme } = useAppTheme();
+  return (
+    <Illustration
+      width={260}
+      height={260}
+      source={scheme === "dark" ? emptyDark : emptyLight}
+      label="Sin TOCs cargados"
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  logoPlate: {
-    borderRadius: 14,
-  },
-  logoPlateDark: {
-    backgroundColor: "#F8F8F5",
-    paddingHorizontal: 8,
-  },
   logo: {
     width: 132,
     height: 44,

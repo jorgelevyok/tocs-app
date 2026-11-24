@@ -5,7 +5,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
 import { AppIcon } from "@/components/AppIcon";
-import { Illustration } from "@/components/Illustration";
+import { EmptyTocsIllustration } from "@/components/Illustration";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { RecordModal } from "@/components/RecordModal";
 import { Screen } from "@/components/Screen";
@@ -19,7 +19,7 @@ import type { Confirmation } from "@/domain/types";
 
 export default function HomeScreen() {
   const { colors } = useAppTheme();
-  const { tocs, confirmations, register, removeConfirmation, saveDetails, setHistoryTocId } = useTocs();
+  const { tocs, confirmations, register, removeConfirmation, removeToc, saveDetails, setHistoryTocId } = useTocs();
   const [undoId, setUndoId] = useState<string | null>(null);
   const [pending, setPending] = useState<Confirmation | null>(null);
 
@@ -36,8 +36,8 @@ export default function HomeScreen() {
       <AppHeader mode="home" onAdd={() => pushPath("/toc/nuevo")} />
       {items.length === 0 ? (
         <View style={styles.empty}>
-          <Illustration width={220} height={180} />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No tienes TOCs configurados</Text>
+          <EmptyTocsIllustration />
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No hay TOCs cargados</Text>
           <PrimaryButton label="Crear mi primer TOC" onPress={() => pushPath("/toc/nuevo")} testID="create-first-toc" />
         </View>
       ) : (
@@ -101,6 +101,16 @@ export default function HomeScreen() {
           onSave={async (details) => {
             await saveDetails(pending.id, details);
             setPending(null);
+          }}
+          onDeleteToc={() => {
+            const tocId = pending.tocId;
+            removeToc(tocId);
+            setPending(null);
+            setUndoId((current) => {
+              if (!current) return null;
+              const confirmation = confirmations.find((item) => item.id === current);
+              return confirmation?.tocId === tocId ? null : current;
+            });
           }}
         />
       ) : null}

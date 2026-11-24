@@ -112,3 +112,10 @@ export function withoutConfirmation(data: StoredData, id: string): StoredData {
     confirmations: data.confirmations.filter((item) => item.id !== id),
   };
 }
+
+export function withoutToc(data: StoredData, id: string): StoredData {
+  return {
+    tocs: data.tocs.filter((toc) => toc.id !== id),
+    confirmations: data.confirmations.filter((item) => item.tocId !== id),
+  };
+}

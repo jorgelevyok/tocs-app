@@ -15,7 +15,7 @@ import { useTocs } from "@/state/tocs";
 
 export default function HistoryScreen() {
   const { colors } = useAppTheme();
-  const { tocs, confirmations, historyTocId, setHistoryTocId } = useTocs();
+  const { tocs, confirmations, historyTocId, setHistoryTocId, removeConfirmation } = useTocs();
   const [open, setOpen] = useState(false);
   const selected = tocs.find((toc) => toc.id === historyTocId) ?? null;
   const groups = useMemo(
@@ -66,7 +66,13 @@ export default function HistoryScreen() {
             <Text style={[styles.dayText, { color: colors.onMint }]}>{section.title}</Text>
           </View>
         )}
-        renderItem={({ item }) => <HistoryRow confirmation={item} toc={tocs.find((toc) => toc.id === item.tocId)} />}
+        renderItem={({ item }) => (
+          <HistoryRow
+            confirmation={item}
+            toc={tocs.find((toc) => toc.id === item.tocId)}
+            onDelete={() => removeConfirmation(item.id)}
+          />
+        )}
         ListEmptyComponent={
           <Text style={[styles.empty, { color: colors.textMuted }]}>
             {selected ? "Este TOC todavía no tiene registros." : "Todavía no hay registros."}

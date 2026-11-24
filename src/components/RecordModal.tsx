@@ -9,7 +9,7 @@ import {
 } from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import { BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
@@ -26,9 +26,10 @@ type RecordModalProps = {
   tocName: string;
   onClose: () => void;
   onSave: (details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
+  onDeleteToc: () => void;
 };
 
-export function RecordModal({ confirmation, tocName, onClose, onSave }: RecordModalProps) {
+export function RecordModal({ confirmation, tocName, onClose, onSave, onDeleteToc }: RecordModalProps) {
   const { colors } = useAppTheme();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
@@ -87,6 +88,20 @@ export function RecordModal({ confirmation, tocName, onClose, onSave }: RecordMo
     } catch {
       setMessage("No se pudo abrir la galería. El registro se conserva.");
     }
+  };
+
+  const deleteToc = () => {
+    Alert.alert("Borrar TOC", `Se elimina «${tocName}» y todos sus registros.`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Borrar",
+        style: "destructive",
+        onPress: () => {
+          if (recorderState.isRecording) void recorder.stop();
+          onDeleteToc();
+        },
+      },
+    ]);
   };
 
   const save = async () => {
@@ -151,6 +166,17 @@ export function RecordModal({ confirmation, tocName, onClose, onSave }: RecordMo
               disabled={saving}
               testID="record-done"
             />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Borrar ${tocName}`}
+              disabled={saving}
+              onPress={deleteToc}
+              testID="delete-toc"
+              style={({ pressed }) => [styles.delete, { opacity: saving ? 0.5 : pressed ? 0.7 : 1 }]}
+            >
+              <AppIcon name="trash" color={colors.danger} size={18} />
+              <Text style={[styles.deleteLabel, { color: colors.danger }]}>Borrar TOC</Text>
+            </Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -243,5 +269,17 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 18,
     paddingBottom: 18,
+    gap: 8,
+  },
+  delete: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  deleteLabel: {
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

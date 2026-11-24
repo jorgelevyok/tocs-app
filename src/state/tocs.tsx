@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { deleteStored, materializeAppearance, persistConfirmationMedia } from "@/domain/media";
-import { createId, createWriteQueue, parseStoredData, STORAGE_KEYS, withoutConfirmation } from "@/domain/storage";
+import { createId, createWriteQueue, parseStoredData, STORAGE_KEYS, withoutConfirmation, withoutToc } from "@/domain/storage";
 import type { Confirmation, StoredData, Toc, TocDraft } from "@/domain/types";
 
 const EMPTY: StoredData = { tocs: [], confirmations: [] };
@@ -17,6 +17,7 @@ type TocsContextValue = {
   setHistoryTocId: (tocId: string | null) => void;
   register: (tocId: string) => Confirmation;
   removeConfirmation: (id: string) => void;
+  removeToc: (id: string) => void;
   saveDetails: (id: string, details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   addToc: (draft: TocDraft) => Promise<void>;
   updateToc: (id: string, draft: TocDraft) => Promise<void>;
@@ -85,6 +86,22 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  const removeToc = useCallback(
+    (id: string) => {
+      const current = stateRef.current;
+      const toc = current.tocs.find((item) => item.id === id);
+      if (toc?.appearance.kind === "image") deleteStored(toc.appearance.imageUri);
+      for (const confirmation of current.confirmations) {
+        if (confirmation.tocId !== id) continue;
+        deleteStored(confirmation.audioUri);
+        deleteStored(confirmation.photoUri);
+      }
+      setHistoryTocId((selected) => (selected === id ? null : selected));
+      commit((data) => withoutToc(data, id));
+    },
+    [commit],
+  );
+
   const saveDetails = useCallback(
     async (id: string, details: { note?: string; audioUri?: string; photoUri?: string }) => {
       const media = await persistConfirmationMedia(id, details.audioUri, details.photoUri);
@@ -143,11 +160,12 @@ export function TocsProvider({ children }: { children: ReactNode }) {
       setHistoryTocId,
       register,
       removeConfirmation,
+      removeToc,
       saveDetails,
       addToc,
       updateToc,
     }),
-    [ready, state, historyTocId, register, removeConfirmation, saveDetails, addToc, updateToc],
+    [ready, state, historyTocId, register, removeConfirmation, removeToc, saveDetails, addToc, updateToc],
   );
 
   return <TocsContext.Provider value={value}>{children}</TocsContext.Provider>;
