@@ -15,6 +15,7 @@ type TocCardProps = {
   onRegister?: () => void;
   onRegisterWithDetails?: () => void;
   onOpenHistory?: () => void;
+  onEdit?: () => void;
   testID?: string;
 };
 
@@ -25,6 +26,7 @@ export function TocCard({
   onRegister,
   onRegisterWithDetails,
   onOpenHistory,
+  onEdit,
   testID,
 }: TocCardProps) {
   const { colors } = useAppTheme();
@@ -76,9 +78,20 @@ export function TocCard({
           accessibilityLabel={`Ver historial de ${name}`}
           testID={testID ? `${testID}-history` : undefined}
           onPress={onOpenHistory}
-          style={({ pressed }) => [styles.clock, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [styles.side, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
         >
           <AppIcon name="clock" color={colors.primary} size={20} />
+        </Pressable>
+      ) : null}
+      {onEdit ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Editar ${name}`}
+          testID={testID ? `${testID}-edit` : "edit-toc"}
+          onPress={onEdit}
+          style={({ pressed }) => [styles.side, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
+        >
+          <AppIcon name="edit" color={colors.primary} size={20} />
         </Pressable>
       ) : null}
     </View>
@@ -116,7 +129,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 13,
   },
-  clock: {
+  side: {
     width: 40,
     height: 40,
     borderRadius: 20,

@@ -4,6 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
+import { EditTocIllustration } from "@/components/Illustration";
 import { Screen } from "@/components/Screen";
 import { TocForm } from "@/components/TocForm";
 import { formatConfirmationStamp } from "@/domain/dates";
@@ -24,7 +25,7 @@ export default function EditTocScreen() {
   if (!toc) {
     return (
       <Screen edges={["top", "left", "right", "bottom"]}>
-        <AppHeader mode="back" title="Editar TOC" />
+        <AppHeader mode="back" title="Editar TOC" accessory={<EditTocIllustration />} />
         <Text style={[styles.missing, { color: colors.text }]}>No se encontró este TOC.</Text>
       </Screen>
     );
@@ -32,7 +33,7 @@ export default function EditTocScreen() {
 
   return (
     <Screen edges={["top", "left", "right", "bottom"]} testID="edit-toc-screen">
-      <AppHeader mode="back" title="Editar TOC" />
+      <AppHeader mode="back" title="Editar TOC" accessory={<EditTocIllustration />} />
       <TocForm
         initial={{
           name: toc.name,

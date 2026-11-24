@@ -38,6 +38,8 @@ const appearanceLight = require("../../assets/images/appearance.png");
 const appearanceDark = require("../../assets/images/appearance-dark.png");
 const newTocLight = require("../../assets/images/new-toc.png");
 const newTocDark = require("../../assets/images/new-toc-dark.png");
+const editTocLight = require("../../assets/images/edit-toc.png");
+const editTocDark = require("../../assets/images/edit-toc-dark.png");
 
 export function BrandLogo() {
   const { scheme } = useAppTheme();
@@ -107,6 +109,18 @@ export function NewTocIllustration() {
       height={92}
       source={scheme === "dark" ? newTocDark : newTocLight}
       label="Nuevo TOC"
+    />
+  );
+}
+
+export function EditTocIllustration() {
+  const { scheme } = useAppTheme();
+  return (
+    <Illustration
+      width={92}
+      height={92}
+      source={scheme === "dark" ? editTocDark : editTocLight}
+      label="Editar TOC"
     />
   );
 }

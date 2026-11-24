@@ -71,6 +71,7 @@ export default function HomeScreen() {
                   setPending(confirmation);
                 }}
                 onOpenHistory={() => openHistory(item.id)}
+                onEdit={() => pushPath(`/toc/editar/${item.id}`)}
               />
             );
           }}
@@ -115,11 +116,6 @@ export default function HomeScreen() {
               const confirmation = confirmations.find((item) => item.id === current);
               return confirmation?.tocId === tocId ? null : current;
             });
-          }}
-          onEdit={() => {
-            const tocId = pending.tocId;
-            setPending(null);
-            pushPath(`/toc/editar/${tocId}`);
           }}
         />
       ) : null}

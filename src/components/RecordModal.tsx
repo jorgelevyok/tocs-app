@@ -11,7 +11,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { BackHandler, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { AppIcon, AppIconButton } from "@/components/AppIcon";
+import { AppIcon } from "@/components/AppIcon";
 import { AudioClip } from "@/components/AudioClip";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { RecordIllustration } from "@/components/Illustration";
@@ -29,7 +29,6 @@ type RecordModalProps = {
   onSave: (details: { note?: string; audioUri?: string; photoUri?: string }) => Promise<void>;
   onDeleteToc: () => void;
   onDeleteTocAndRecords: () => void;
-  onEdit: () => void;
 };
 
 export function RecordModal({
@@ -39,7 +38,6 @@ export function RecordModal({
   onSave,
   onDeleteToc,
   onDeleteTocAndRecords,
-  onEdit,
 }: RecordModalProps) {
   const { colors } = useAppTheme();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -112,11 +110,6 @@ export function RecordModal({
     else onDeleteToc();
   };
 
-  const edit = () => {
-    if (recorderState.isRecording) void recorder.stop();
-    onEdit();
-  };
-
   const save = async () => {
     setSaving(true);
     setMessage(null);
@@ -151,16 +144,7 @@ export function RecordModal({
               <RecordIllustration />
               <Text style={[styles.saved, { color: colors.text }]}>Registro guardado a las {time}</Text>
             </View>
-            <View style={styles.nameRow}>
-              <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
-              <AppIconButton
-                icon="edit"
-                label={`Editar ${tocName}`}
-                color={colors.primary}
-                onPress={edit}
-                testID="edit-toc"
-              />
-            </View>
+            <Text style={[styles.name, { color: colors.text }]}>{tocName}</Text>
             <TextField
               value={note}
               onChangeText={setNote}
@@ -277,13 +261,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   name: {
-    flex: 1,
     fontSize: 26,
     fontWeight: "800",
   },
