@@ -162,4 +162,26 @@ Inicio ordena las tarjetas con `useMemo`, para no reordenar en cada render. Hist
 
 ### Documentación, pitch y APK
 
-Este README es la documentación. El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de). Las capturas de la app en el emulador están en `docs/capturas/`, incluida la del Drawer.
+Este README es la documentación. Las imágenes y los videos de la entrega están en `docs/`, tomados en el emulador Android (Pixel 7, Expo Go del SDK 58). El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de).
+
+`docs/capturas/` tiene doce capturas, en el orden del flujo:
+
+| Archivo | Qué muestra |
+| --- | --- |
+| `01-vacio.png` | Inicio sin TOCs |
+| `02-nuevo.png` | Alta de «Cerre la llave de gas», con el ícono de llama |
+| `03-icono.png` | La tarjeta en Inicio, todavía sin registros |
+| `04-toque-corto.png` | Toque corto y el aviso «Registro guardado» |
+| `05-deshacer.png` | Después de Deshacer, otra vez sin registros |
+| `06-pulsacion-larga.png` | Modal de la pulsación larga, con la nota «Antes de salir» |
+| `07-historial.png` | Ese registro en Historial, el 25 de noviembre |
+| `08-filtro.png` | Filtro del historial, con «Todos los TOCs» y «Cerre la llave de gas» |
+| `09-ajustes.png` | Apariencia en Claro |
+| `10-oscuro.png` | Apariencia en Oscuro |
+| `11-inicio-oscuro.png` | Inicio en oscuro, con el registro del día |
+| `12-drawer.png` | Drawer con Inicio, Historial y Ajustes |
+
+`docs/demo/` tiene dos videos del mismo recorrido:
+
+- [`demo.mp4`](docs/demo/demo.mp4) (1 min 27 s): grabación continua de la app.
+- [`guided-demo.mp4`](docs/demo/guided-demo.mp4) (4 min 23 s): la demo guiada, para la presentación.
