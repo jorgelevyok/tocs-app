@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * Estado de TOCs y confirmaciones. `stateRef` es la fuente para las
+ * mutaciones: `setState` es asíncrono y dos toques seguidos leerían
+ * el mismo snapshot si se usara solo el estado de React.
+ * `commit` actualiza la ref, pinta y encola `setItem` de `tocs.data.v1`.
+ * El primer render no escribe: `ready` pasa a true recién después de leer.
+ * `historyTocId` no se persiste; es el filtro de la tab Historial.
+ */
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -64,6 +73,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  /** Aplica una función pura al estado actual y persiste el resultado. */
   const commit = useCallback(
     (recipe: (current: StoredData) => StoredData) => {
       const next = recipe(stateRef.current);
@@ -74,6 +84,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [enqueue],
   );
 
+  /** Crea una confirmación solo con hora. La nota y los archivos entran después, en `saveDetails`. */
   const register = useCallback(
     (tocId: string) => {
       const confirmation: Confirmation = {
@@ -122,6 +133,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  /** Borra el TOC. Con `records: true` también saca sus confirmaciones y los archivos. Sin esa opción, la confirmación queda y se le copia el nombre. */
   const removeToc = useCallback(
     (id: string, options?: { records?: boolean }) => {
       const current = stateRef.current;
@@ -140,6 +152,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  /** Copia audio y foto a documentos y escribe la nota en la confirmación existente. No crea otra. */
   const saveDetails = useCallback(
     async (id: string, details: { note?: string; audioUri?: string; photoUri?: string }) => {
       const media = await persistConfirmationMedia(id, details.audioUri, details.photoUri);
@@ -161,6 +174,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  /** Alta. Primero materializa la imagen de portada y después inserta el TOC. */
   const addToc = useCallback(
     async (draft: TocDraft) => {
       const id = createId();
@@ -176,6 +190,7 @@ export function TocsProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  /** Edición. Conserva `id` y las confirmaciones. Si cambia la portada, borra el archivo anterior. */
   const updateToc = useCallback(
     async (id: string, draft: TocDraft) => {
       const previous = stateRef.current.tocs.find((toc) => toc.id === id);

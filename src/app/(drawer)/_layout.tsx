@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Drawer que envuelve las tabs. Se abre con el botón de menú de Inicio
+ * y con el gesto desde el borde izquierdo. El header nativo no se usa;
+ * cada pantalla dibuja el suyo.
+ */
+
 import { Drawer } from "expo-router/drawer";
 
 import { AppDrawerContent } from "@/components/AppDrawerContent";

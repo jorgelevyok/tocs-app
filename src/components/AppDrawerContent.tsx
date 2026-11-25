@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Contenido del Drawer. Inicio hace `navigate` a la tab. Nuevo TOC hace `push`
+ * y cierra el panel antes, para no dejarlo abierto sobre el Stack.
+ */
+
 import { DrawerContentScrollView, type DrawerContentComponentProps } from "expo-router/drawer";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

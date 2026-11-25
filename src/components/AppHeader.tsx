@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * Encabezado propio. `mode: "home"` centra el logo, abre el Drawer a la
+ * izquierda y deja el alta a la derecha. `mode: "back"` usa `goBack` salvo
+ * que la pantalla pase `onBack` (las tabs vuelven a Inicio con `navigate`,
+ * no desapilan).
+ */
+
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -20,11 +29,18 @@ type AppHeaderProps =
 
 export function AppHeader(props: AppHeaderProps) {
   const { colors } = useAppTheme();
+  const navigation = useNavigation();
 
   if (props.mode === "home") {
     return (
       <View style={styles.home}>
-        <View style={styles.spacer} />
+        <AppIconButton
+          icon="menu"
+          label="Abrir menú"
+          color={colors.primary}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          testID="open-drawer"
+        />
         <View pointerEvents="none" style={styles.logoWrap}>
           <BrandLogo />
         </View>

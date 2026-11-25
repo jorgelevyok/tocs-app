@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Contenedor de pantalla. `edges` omite el borde inferior por defecto
+ * para no sumar padding encima de la tab bar. `Card` es la superficie
+ * con borde y radio usados por los bloques estáticos.
+ */
+
 import type { ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";

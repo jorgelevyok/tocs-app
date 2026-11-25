@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Hoja del registro ya creado. Cerrarla no borra la confirmación:
+ * `onSave` es el único camino que escribe nota, audio y foto.
+ * El audio se graba en la caché del recorder; la copia a documentos
+ * ocurre en `saveDetails` → `persistConfirmationMedia`.
+ * `BackHandler` cierra primero el diálogo de borrado, después la foto, después la hoja.
+ */
+
 import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
@@ -9,7 +17,7 @@ import {
 } from "expo-audio";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Animated, BackHandler, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppIcon } from "@/components/AppIcon";
@@ -64,6 +72,10 @@ export function RecordModal({
     const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
       if (confirmDelete) {
         setConfirmDelete(false);
+        return true;
+      }
+      if (visualOpen) {
+        setVisualOpen(false);
         return true;
       }
       close();
@@ -144,7 +156,7 @@ export function RecordModal({
         style={styles.center}
       >
         <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.titleRow}>
               <RecordIllustration />
               <Text style={[styles.saved, { color: colors.text }]}>Registro guardado a las {time}</Text>
@@ -238,7 +250,7 @@ export function RecordModal({
 
 function RecordingIndicator() {
   const { colors } = useAppTheme();
-  const bars = useRef([new Animated.Value(0.35), new Animated.Value(0.35), new Animated.Value(0.35)]).current;
+  const [bars] = useState(() => [new Animated.Value(0.35), new Animated.Value(0.35), new Animated.Value(0.35)]);
 
   useEffect(() => {
     const animations = bars.map((bar, index) =>
@@ -314,6 +326,10 @@ const styles = StyleSheet.create({
     maxHeight: "92%",
     borderRadius: 28,
     overflow: "hidden",
+  },
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
   content: {
     padding: 18,

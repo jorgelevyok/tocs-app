@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Barra inferior. `navigateToTab` viene de `expo-router/js-tabs` y cambia
+ * la ruta sin apilar. El icono sale del nombre de archivo de la tab.
+ */
+
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

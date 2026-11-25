@@ -1,3 +1,10 @@
+/**
+ * Fechas de presentación. El día se arma con el calendario local
+ * (`getFullYear` / `getMonth` / `getDate`), no con `toISOString`:
+ * en UTC-3 un registro de las 21:00 locales pasaría al día siguiente en UTC.
+ * `hourCycle: "h23"` fuerza 00–23; `Intl` en es-AR a veces inserta un espacio fino.
+ */
+
 const DAY_MS = 86_400_000;
 
 function capitalize(value: string): string {

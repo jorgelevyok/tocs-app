@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Raíz de Expo Router. Monta el tema y los datos antes del Stack.
+ * El splash sigue visible hasta que AsyncStorage terminó de leerse:
+ * `ready` evita pintar el estado vacío encima de datos que todavía no llegaron.
+ * Los colores propios se copian al ThemeProvider de navegación para que
+ * el fondo de las transiciones coincida con la paleta.
+ */
+
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";

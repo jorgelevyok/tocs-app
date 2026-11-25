@@ -1,3 +1,11 @@
+/**
+ * Lectura y transformaciones del JSON de AsyncStorage.
+ * `parseStoredData` devuelve null si el texto no es el shape esperado:
+ * el caller no debe escribir una lista vacía en ese caso, porque pisaría datos válidos.
+ * Los filtros `without*` son puros: no tocan disco ni archivos.
+ * `createWriteQueue` serializa escrituras para que dos `setItem` no se pisen.
+ */
+
 import { TOC_ICONS, type AppearancePreference, type Confirmation, type StoredData, type Toc, type TocAppearance, type TocIconName } from "./types";
 
 export const STORAGE_KEYS = {

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Historial. `SectionList` recibe una sección por día local.
+ * Colapsar un día vacía `data` de esa sección; los ids siguen en `recordIds`
+ * para poder borrar el día aunque no esté expandido.
+ * `historyTocId` filtra antes de agrupar. null es «Todos los TOCs».
+ */
+
 import { useMemo, useState } from "react";
 import { Modal, Pressable, SectionList, StyleSheet, Text, View } from "react-native";
 
@@ -49,6 +56,7 @@ export default function HistoryScreen() {
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled={false}
         extraData={collapsed}
+        style={styles.list}
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
@@ -122,9 +130,11 @@ export default function HistoryScreen() {
           />
         )}
         ListEmptyComponent={
-          <Text style={[styles.empty, { color: colors.textMuted }]}>
-            {selected ? "Este TOC todavía no tiene registros." : "Todavía no hay registros."}
-          </Text>
+          groups.length === 0 ? (
+            <Text style={[styles.empty, { color: colors.textMuted }]}>
+              {selected ? "Este TOC todavía no tiene registros." : "Todavía no hay registros."}
+            </Text>
+          ) : undefined
         }
       />
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -212,6 +222,9 @@ function FilterOption({ label, selected, onPress }: { label: string; selected: b
 }
 
 const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: 16,
     paddingBottom: 24,

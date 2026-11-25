@@ -1,3 +1,10 @@
+/**
+ * Consultas puras sobre confirmaciones. No leen almacenamiento.
+ * El orden de Inicio usa la confirmación más nueva; si no hay, `createdAt`.
+ * El historial agrupa por clave `año-mes-día` local, de la más nueva a la más vieja.
+ * `tocId` null deja todos los TOCs; un id filtra antes de agrupar.
+ */
+
 import { formatDayHeading } from "./dates";
 import type { Confirmation, Toc } from "./types";
 
@@ -7,6 +14,7 @@ export type HistoryGroup = {
   items: Confirmation[];
 };
 
+/** La confirmación de mayor `at` para un TOC. La comparación es lexicográfica sobre ISO. */
 export function latestConfirmation(confirmations: Confirmation[], tocId: string): Confirmation | undefined {
   return confirmations.reduce<Confirmation | undefined>((latest, item) => {
     if (item.tocId !== tocId) return latest;
@@ -15,6 +23,7 @@ export function latestConfirmation(confirmations: Confirmation[], tocId: string)
   }, undefined);
 }
 
+/** Copia ordenada. No muta el array que viene del estado. */
 export function sortTocsForHome(tocs: Toc[], confirmations: Confirmation[]): Toc[] {
   return tocs.slice().sort((a, b) => {
     const aTime = latestConfirmation(confirmations, a.id)?.at ?? "";

@@ -1,4 +1,10 @@
-/** Datos que TOCs guarda en el dispositivo. */
+/**
+ * Modelo persistido. Un TOC es la plantilla (nombre + apariencia).
+ * Una Confirmation es un registro con hora. La foto de la tarjeta
+ * (`appearance.imageUri`) y la foto de un registro (`photoUri`) son archivos distintos.
+ * `tocName` se copia al borrar el TOC para que el historial siga mostrando el nombre.
+ * `imagePersisted` marca que el URI ya está en documentos y no hay que volver a copiarlo.
+ */
 
 export const TOC_ICONS = ["flame", "lock", "home", "water", "leaf", "check"] as const;
 

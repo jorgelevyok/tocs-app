@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Apariencia de un TOC en la tarjeta: ícono del catálogo, imagen de portada o nada.
+ * No muestra la foto de una confirmación.
+ */
+
 import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 

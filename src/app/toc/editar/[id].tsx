@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Edición. El `id` llega por la ruta `/toc/editar/[id]` (`useLocalSearchParams`).
+ * Expo puede entregar el param como string o como array; se normaliza al primer valor.
+ * `imagePersisted` queda en true si la apariencia ya es una imagen guardada,
+ * para que `materializeAppearance` no vuelva a copiar el mismo archivo.
+ * Si el id no está en memoria, se muestra el vacío sin crear un TOC nuevo.
+ */
+
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text } from "react-native";
 

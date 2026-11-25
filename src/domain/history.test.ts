@@ -1,3 +1,8 @@
+/**
+ * Pruebas de fechas e historial. Corren con `node:test` vía `tsx`, sin emulador.
+ * `now` está fijo para que «Hoy» y «Ayer» no dependan del reloj de la máquina.
+ */
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

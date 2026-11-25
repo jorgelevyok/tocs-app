@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Tema de la app. `preference` es lo que eligió la persona (`light` | `dark` | `system`).
+ * `scheme` es el tema efectivo: con `system` sale de `useColorScheme`.
+ * Los componentes leen `colors` y no escriben hex propios.
+ * La preferencia se persiste en `tocs.appearance.v1` después de pintar,
+ * en una cola para no perder un cambio rápido.
+ */
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";

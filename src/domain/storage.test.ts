@@ -1,3 +1,9 @@
+/**
+ * Pruebas del parser y de los borrados puros. Un JSON inválido tiene que
+ * devolver null, no una lista vacía. Borrar el TOC sin `records` conserva
+ * la confirmación y le copia el nombre.
+ */
+
 import assert from "node:assert/strict";
 import test from "node:test";
 

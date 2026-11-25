@@ -1,6 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+/**
+ * Inicio. Un toque corto llama a `register` y muestra el aviso 3 segundos.
+ * Una pulsación larga también llama a `register` una sola vez y abre el modal;
+ * el aviso de Deshacer no se muestra en ese caso.
+ * Al perder el foco el aviso se descarta: la confirmación ya está guardada.
+ * El reloj no registra: solo fija `historyTocId` y navega a Historial.
+ */
+
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader } from "@/components/AppHeader";
@@ -18,7 +27,7 @@ import { useTocs } from "@/state/tocs";
 import type { Confirmation } from "@/domain/types";
 
 export default function HomeScreen() {
-  const { colors } = useAppTheme();
+  const { colors, scheme } = useAppTheme();
   const { tocs, confirmations, register, removeConfirmation, removeToc, saveDetails, setHistoryTocId } = useTocs();
   const [undoId, setUndoId] = useState<string | null>(null);
   const [pending, setPending] = useState<Confirmation | null>(null);
@@ -31,19 +40,32 @@ export default function HomeScreen() {
     navigatePath("/historial");
   };
 
+  useEffect(() => {
+    if (!undoId) return;
+    const timeout = setTimeout(() => setUndoId(null), 3000);
+    return () => clearTimeout(timeout);
+  }, [undoId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => setUndoId(null);
+    }, []),
+  );
+
   return (
     <Screen testID="home-screen">
       <AppHeader mode="home" onAdd={() => pushPath("/toc/nuevo")} />
       {items.length === 0 ? (
         <View style={styles.empty}>
           <EmptyTocsIllustration />
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>No hay TOCs cargados</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>No tienes TOCs configurados</Text>
           <PrimaryButton label="Crear mi primer TOC" onPress={() => pushPath("/toc/nuevo")} testID="create-first-toc" />
         </View>
       ) : (
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
+          style={styles.listView}
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={[styles.hint, { backgroundColor: colors.mint }]}>
@@ -78,9 +100,9 @@ export default function HomeScreen() {
         />
       )}
       {undoId ? (
-        <View style={styles.undo} testID="undo-snackbar">
-          <AppIcon name="checkCircle" color="#FFFFFF" size={22} />
-          <Text style={styles.undoText}>Registro guardado</Text>
+        <View style={[styles.undo, { backgroundColor: colors.primary }]} testID="undo-snackbar">
+          <AppIcon name="checkCircle" color={colors.onPrimary} size={22} />
+          <Text style={[styles.undoText, { color: colors.onPrimary }]}>Registro guardado</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Deshacer"
@@ -90,7 +112,7 @@ export default function HomeScreen() {
             }}
             testID="undo-action"
           >
-            <Text style={styles.undoAction}>Deshacer</Text>
+            <Text style={[styles.undoAction, { color: scheme === "dark" ? colors.onMint : colors.mint }]}>Deshacer</Text>
           </Pressable>
         </View>
       ) : null}
@@ -137,6 +159,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     textAlign: "center",
   },
+  listView: {
+    flex: 1,
+  },
   list: {
     paddingHorizontal: 16,
     paddingBottom: 96,
@@ -167,17 +192,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#006B5B",
   },
   undoText: {
     flex: 1,
     fontSize: 15,
     fontWeight: "700",
-    color: "#FFFFFF",
   },
   undoAction: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#DDF1E9",
   },
 });

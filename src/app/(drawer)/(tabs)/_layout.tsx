@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Tabs de Inicio, Historial y Ajustes. La barra es `TocsTabBar`:
+ * el tab bar por defecto de Expo Router no se renderiza.
+ * `headerShown: false` porque el título vive en `AppHeader`.
+ */
+
 import { Tabs } from "expo-router/js-tabs";
 
 import { TocsTabBar } from "@/components/TocsTabBar";

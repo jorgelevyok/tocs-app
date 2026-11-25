@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Ilustraciones por pantalla. Cada export elige el PNG claro u oscuro
+ * según `scheme`. Los archivos están en `assets/images/illustrations/<pantalla>/`.
+ * El logo de marca está aparte, en `assets/images/logo/`.
+ */
+
 import { Image, type ImageSource } from "expo-image";
 import { StyleSheet, View } from "react-native";
 
@@ -24,22 +30,22 @@ export function Illustration({ width, height, source, label }: IllustrationProps
   return <Image source={source} style={{ width, height }} contentFit="contain" accessibilityLabel={label} />;
 }
 
-const lightLogo = require("../../assets/images/tocs-logo.png");
-const darkLogo = require("../../assets/images/tocs-dark-logo.png");
-const emptyLight = require("../../assets/images/empty-tocs.png");
-const emptyDark = require("../../assets/images/empty-tocs-dark.png");
-const deleteLight = require("../../assets/images/delete.png");
-const deleteDark = require("../../assets/images/delete-dark.png");
-const historyLight = require("../../assets/images/history.png");
-const historyDark = require("../../assets/images/history-dark.png");
-const detailLight = require("../../assets/images/toc-detail.png");
-const detailDark = require("../../assets/images/toc-detail-dark.png");
-const appearanceLight = require("../../assets/images/appearance.png");
-const appearanceDark = require("../../assets/images/appearance-dark.png");
-const newTocLight = require("../../assets/images/new-toc.png");
-const newTocDark = require("../../assets/images/new-toc-dark.png");
-const editTocLight = require("../../assets/images/edit-toc.png");
-const editTocDark = require("../../assets/images/edit-toc-dark.png");
+const lightLogo = require("../../assets/images/logo/light.png");
+const darkLogo = require("../../assets/images/logo/dark.png");
+const emptyLight = require("../../assets/images/illustrations/inicio/light.png");
+const emptyDark = require("../../assets/images/illustrations/inicio/dark.png");
+const deleteLight = require("../../assets/images/illustrations/borrar/light.png");
+const deleteDark = require("../../assets/images/illustrations/borrar/dark.png");
+const historyLight = require("../../assets/images/illustrations/historial/light.png");
+const historyDark = require("../../assets/images/illustrations/historial/dark.png");
+const detailLight = require("../../assets/images/illustrations/registro/light.png");
+const detailDark = require("../../assets/images/illustrations/registro/dark.png");
+const appearanceLight = require("../../assets/images/illustrations/ajustes/light.png");
+const appearanceDark = require("../../assets/images/illustrations/ajustes/dark.png");
+const newTocLight = require("../../assets/images/illustrations/nuevo/light.png");
+const newTocDark = require("../../assets/images/illustrations/nuevo/dark.png");
+const editTocLight = require("../../assets/images/illustrations/editar/light.png");
+const editTocDark = require("../../assets/images/illustrations/editar/dark.png");
 
 export function BrandLogo() {
   const { scheme } = useAppTheme();

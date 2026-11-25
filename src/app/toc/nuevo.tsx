@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Alta de un TOC. Vive en el Stack, fuera de las tabs.
+ * Al resolver `addToc` hace `goBack`: la pantalla nueva no queda en el historial.
+ */
+
 import { AppHeader } from "@/components/AppHeader";
 import { NewTocIllustration } from "@/components/Illustration";
 import { Screen } from "@/components/Screen";

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Botón de acción principal. El fondo es `colors.primary` y el texto `onPrimary`.
+ * `disabled` baja la opacidad y bloquea `onPress`.
+ */
+
 import { Pressable, StyleSheet, Text } from "react-native";
 
 import { AppIcon, type IconName } from "@/components/AppIcon";

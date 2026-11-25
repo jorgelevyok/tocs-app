@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Miniatura de una foto local. El toque abre un `Modal` a pantalla completa.
+ * `onRequestClose` cubre el botón atrás de Android sobre ese modal.
+ */
+
 import { Image } from "expo-image";
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Diálogo modal de confirmación. Cubre la pantalla con el tamaño físico
+ * (`Dimensions.get("screen")`) porque el overlay del `Modal` transparente
+ * no hereda el alto de la ventana segura. `onRequestClose` es el atrás de Android.
+ * La ilustración por defecto es la de borrar.
+ */
+
 import { StatusBar } from "expo-status-bar";
 import { Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -36,7 +43,7 @@ export function ConfirmDialog({ visible, title, testID, onClose, actions }: Conf
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
-      <StatusBar hidden />
+      {visible ? <StatusBar hidden /> : null}
       <View style={[styles.overlay, { width: screen.width, height: screen.height }]}>
         <Pressable accessibilityLabel="Cancelar" style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={[styles.card, { backgroundColor: colors.surface }]} testID={testID}>

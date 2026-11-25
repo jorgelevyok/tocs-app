@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Única preferencia persistida de la pantalla: `light`, `dark` o `system`.
+ * `setPreference` actualiza el contexto y AsyncStorage. El botón atrás
+ * va a Inicio con `navigate`, no con `goBack`, porque Ajustes es una tab.
+ */
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader, backToHome } from "@/components/AppHeader";

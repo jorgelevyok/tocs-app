@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Tarjeta de un TOC. `skipPress` evita que el `onPress` del toque corto
+ * se dispare después del `onLongPress`: Pressable emite los dos.
+ * El reloj y el lápiz son Pressable aparte, así que no registran.
+ */
+
 import { useRef } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

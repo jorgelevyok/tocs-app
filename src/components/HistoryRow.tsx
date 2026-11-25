@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Fila de una confirmación dentro de un día. El nombre sale del TOC vivo
+ * o, si ya no existe, de `confirmation.tocName`. Borrar pide confirmación
+ * y delega el borrado del archivo al estado.
+ */
+
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

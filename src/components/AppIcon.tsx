@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Íconos. En iOS se usa SF Symbols (`SymbolView`). En Android se carga
+ * Material Symbols y se dibuja el glifo por el codepoint de `ANDROID`.
+ * `AppIconButton` y `PlusButton` son los controles de 44 px del encabezado.
+ */
+
 import { loadAsync } from "expo-font";
 import { MaterialSymbols_400Regular } from "@expo-google-fonts/material-symbols/400Regular";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * `TextInput` controlado. El valor vive en el padre (`value` / `onChangeText`).
+ * El color de placeholder sale del tema; el borde pasa a `danger` si hay `error`.
+ */
+
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
 
 import { useAppTheme } from "@/state/theme";

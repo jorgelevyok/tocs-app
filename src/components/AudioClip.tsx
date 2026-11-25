@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Reproductor de un URI local. `useAudioPlayer` carga el archivo al montar.
+ * Play y pause salen de `useAudioPlayerStatus`. `onRemove` solo quita el URI
+ * del formulario; no borra el archivo hasta que el padre persista o descarte.
+ */
+
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

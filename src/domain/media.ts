@@ -1,3 +1,11 @@
+/**
+ * Archivos de la app. AsyncStorage guarda el URI, no el binario.
+ * Destinos, todos bajo `Paths.document`:
+ * `tocs-covers` imagen de la tarjeta, `tocs-photos` foto de un registro, `tocs-audio` la nota de voz.
+ * `persistFile` copia y, si el origen está en `Paths.cache`, lo borra.
+ * No borra un URI que ya vive en documentos: sería el archivo definitivo.
+ */
+
 import { Directory, File, Paths } from "expo-file-system";
 
 import type { TocAppearance, TocDraft } from "./types";
@@ -24,11 +32,18 @@ export function deleteStored(uri: string | undefined): void {
   }
 }
 
+function isCacheCopy(uri: string): boolean {
+  const cache = Paths.cache.uri;
+  const base = cache.endsWith("/") ? cache : `${cache}/`;
+  return uri.startsWith(base);
+}
+
 export async function persistFile(sourceUri: string, directoryName: string, filename: string): Promise<string> {
   const destination = new File(folder(directoryName), filename);
   if (destination.exists) destination.delete();
   const source = new File(sourceUri);
   await source.copy(destination);
+  if (source.uri !== destination.uri && isCacheCopy(source.uri)) deleteStored(source.uri);
   return destination.uri;
 }
 

@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * Formulario compartido por el alta y la edición.
+ * El nombre se recorta al enviar. Modo `image` sin URI no se puede guardar.
+ * La cámara pide permiso antes de `launchCameraAsync`. Si se niega, el nombre
+ * escrito se conserva y el error queda en el estado local del formulario.
+ * `imagePersisted` viaja en el draft para que el almacenamiento no recopíe
+ * una imagen que ya está en `tocs-covers`.
+ */
+
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
