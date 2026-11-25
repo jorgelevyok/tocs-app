@@ -104,7 +104,7 @@ npx eas-cli@latest login
 npx eas-cli@latest build -p android --profile preview
 ```
 
-El APK de esta entrega está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de).
+El APK de esta entrega está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/ec572739-da5f-4e85-aef9-6dee049af0ac](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/ec572739-da5f-4e85-aef9-6dee049af0ac).
 
 ## Dependencias principales
 
@@ -162,7 +162,7 @@ Inicio ordena las tarjetas con `useMemo`, para no reordenar en cada render. Hist
 
 ### Documentación, pitch y APK
 
-Este README es la documentación. Las imágenes y los videos de la entrega están en `docs/`, tomados en el emulador Android (Pixel 7, Expo Go del SDK 58). El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de).
+Este README es la documentación. Las imágenes y los videos de la entrega están en `docs/`, tomados en el emulador Android (Pixel 7, Expo Go del SDK 58). El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/ec572739-da5f-4e85-aef9-6dee049af0ac](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/ec572739-da5f-4e85-aef9-6dee049af0ac).
 
 `docs/capturas/` tiene doce capturas, en el orden del flujo:
 
