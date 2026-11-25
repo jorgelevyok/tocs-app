@@ -36,7 +36,7 @@ src/state/                           Tema y TOCs
 src/domain/                          Fechas, historial, AsyncStorage y archivos
 ```
 
-La barra inferior está en las tres pestañas. Nuevo TOC y Editar TOC viven en el Stack, fuera de las tabs. El Drawer envuelve las pestañas. En Inicio, el botón de menú de la izquierda lo abre. También se abre deslizando desde el borde izquierdo. El panel muestra Inicio y Nuevo TOC.
+La barra inferior está en las tres pestañas. Nuevo TOC y Editar TOC viven en el Stack, fuera de las tabs. El Drawer envuelve las pestañas. En Inicio, el botón de menú de la izquierda lo abre. También se abre deslizando desde el borde izquierdo. El panel muestra Inicio, Historial y Ajustes, y cada uno abre esa pestaña.
 
 El día del historial se calcula con el calendario local del dispositivo. No se usa `toISOString()` para agrupar, porque en Argentina (UTC-3) eso puede correr el registro al día anterior.
 
@@ -142,7 +142,7 @@ Inicio muestra los TOCs con `FlatList` en `src/app/(drawer)/(tabs)/index.tsx`. H
 
 ### Navegación: parámetros, push y goBack
 
-El botón de menú de Inicio abre el Drawer con `DrawerActions.openDrawer` en `src/components/AppHeader.tsx`. El panel está en `src/app/(drawer)/_layout.tsx` y su contenido en `src/components/AppDrawerContent.tsx`: Inicio hace `navigate` a la tab y Nuevo TOC hace `push` a `/toc/nuevo`. El botón **+** y «Crear mi primer TOC» también hacen `push` a `/toc/nuevo`. Editar hace `push` a `/toc/editar/[id]`. Esa pantalla lee el `id` con `useLocalSearchParams` y, al guardar, vuelve con `goBack` en `src/lib/navigation.ts`. El reloj de la tarjeta abre Historial con `navigate`.
+El botón de menú de Inicio abre el Drawer con `DrawerActions.openDrawer` en `src/components/AppHeader.tsx`. El panel está en `src/app/(drawer)/_layout.tsx` y su contenido en `src/components/AppDrawerContent.tsx`: Inicio, Historial y Ajustes hacen `navigate` a cada pestaña. El botón **+** y «Crear mi primer TOC» también hacen `push` a `/toc/nuevo`. Editar hace `push` a `/toc/editar/[id]`. Esa pantalla lee el `id` con `useLocalSearchParams` y, al guardar, vuelve con `goBack` en `src/lib/navigation.ts`. El reloj de la tarjeta abre Historial con `navigate`.
 
 ### Formularios
 
@@ -162,4 +162,4 @@ Inicio ordena las tarjetas con `useMemo`, para no reordenar en cada render. Hist
 
 ### Documentación, pitch y APK
 
-Este README es la documentación. El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de). Las capturas de la app en el emulador están en `docs/capturas/`, incluida la del Drawer. El video de respaldo, por si el emulador falla en la presentación, está en `docs/demo/respaldo.mp4`.
+Este README es la documentación. El APK está en [expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de](https://expo.dev/accounts/jorgelevyok/projects/tocs-app/builds/86e38335-a45f-4690-8a26-2d5bcce6c1de). Las capturas de la app en el emulador están en `docs/capturas/`, incluida la del Drawer.

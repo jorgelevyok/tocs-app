@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Contenido del Drawer. Inicio hace `navigate` a la tab. Nuevo TOC hace `push`
- * y cierra el panel antes, para no dejarlo abierto sobre el Stack.
+ * Contenido del Drawer. Cada ítem cierra el panel y hace `navigate`
+ * a la pestaña: Inicio, Historial o Ajustes.
  */
 
 import { DrawerContentScrollView, type DrawerContentComponentProps } from "expo-router/drawer";
@@ -11,21 +11,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppIcon, type IconName } from "@/components/AppIcon";
 import { BrandLogo } from "@/components/Illustration";
-import { navigatePath, pushPath } from "@/lib/navigation";
+import { navigatePath } from "@/lib/navigation";
 import { useAppTheme } from "@/state/theme";
 
 export function AppDrawerContent(props: DrawerContentComponentProps) {
   const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const goHome = () => {
+  const go = (path: string) => {
     props.navigation.closeDrawer();
-    navigatePath("/");
-  };
-
-  const createToc = () => {
-    props.navigation.closeDrawer();
-    pushPath("/toc/nuevo");
+    navigatePath(path);
   };
 
   return (
@@ -36,8 +31,9 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
     >
       <BrandLogo />
       <Text style={[styles.caption, { color: colors.textMuted }]}>Registrá lo que ya hiciste</Text>
-      <DrawerLink icon="home" label="Inicio" onPress={goHome} testID="drawer-home" />
-      <DrawerLink icon="add" label="Nuevo TOC" onPress={createToc} testID="drawer-new-toc" />
+      <DrawerLink icon="home" label="Inicio" onPress={() => go("/")} testID="drawer-home" />
+      <DrawerLink icon="history" label="Historial" onPress={() => go("/historial")} testID="drawer-history" />
+      <DrawerLink icon="settings" label="Ajustes" onPress={() => go("/ajustes")} testID="drawer-settings" />
     </DrawerContentScrollView>
   );
 }
